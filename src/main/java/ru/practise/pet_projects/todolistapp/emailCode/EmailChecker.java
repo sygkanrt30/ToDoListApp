@@ -24,7 +24,7 @@ public class EmailChecker {
         return code;
     }
 
-    public void sendCheckCodeTo(String email) {
+    public void sendCodeToCheck(String email) {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.ssl.enable", "true");

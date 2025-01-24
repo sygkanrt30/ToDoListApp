@@ -22,7 +22,7 @@
             <Font name="Sitka Heading Bold" size="18.0" />
          </font>
       </Label>
-      <TextField fx:id="username" layoutX="36.0" layoutY="154.0" prefHeight="38.0" prefWidth="429.0" promptText="Введите имя пользователя(3-15 символов)" style="-fx-background-color: #FAEBD7;" stylesheets="@../StyleTextFields.css">
+      <TextField fx:id="username" layoutX="36.0" layoutY="154.0" onKeyPressed="#clearLabelUsername" prefHeight="38.0" prefWidth="429.0" promptText="Введите имя пользователя(3-15 символов)" style="-fx-background-color: #FAEBD7;" stylesheets="@../StyleTextFields.css">
          <font>
             <Font name="Sitka Heading Bold" size="18.0" />
          </font>
@@ -32,7 +32,7 @@
             <Font name="Sitka Heading Bold" size="18.0" />
          </font>
       </Label>
-      <TextField fx:id="email" layoutX="36.0" layoutY="276.0" prefHeight="38.0" prefWidth="429.0" promptText="example@example.com" style="-fx-background-color: #FAEBD7;" stylesheets="@../StyleTextFields.css">
+      <TextField fx:id="email" layoutX="36.0" layoutY="276.0" onKeyPressed="#clearLabel" prefHeight="38.0" prefWidth="429.0" promptText="example@example.com" style="-fx-background-color: #FAEBD7;" stylesheets="@../StyleTextFields.css">
          <font>
             <Font name="Sitka Heading Bold" size="18.0" />
          </font>
@@ -42,7 +42,7 @@
             <Font name="Sitka Heading Bold" size="18.0" />
          </font>
       </Label>
-      <TextField fx:id="password" layoutX="36.0" layoutY="375.0" prefHeight="38.0" prefWidth="429.0" promptText="Введите пароль(8-16 символов)" style="-fx-background-color: #FAEBD7;" stylesheets="@../StyleTextFields.css">
+      <TextField fx:id="password" layoutX="36.0" layoutY="375.0" onKeyPressed="#clearLabel" prefHeight="38.0" prefWidth="429.0" promptText="Введите пароль(8-16 символов)" style="-fx-background-color: #FAEBD7;" stylesheets="@../StyleTextFields.css">
          <font>
             <Font name="Sitka Heading Bold" size="16.0" />
          </font>

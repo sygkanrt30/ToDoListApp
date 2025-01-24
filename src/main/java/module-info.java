@@ -11,8 +11,8 @@ module ru.practise.pet_projects.todolistapp {
     exports ru.practise.pet_projects.todolistapp.registration_part.logup;
     opens ru.practise.pet_projects.todolistapp.registration_part.logup to javafx.fxml;
     exports ru.practise.pet_projects.todolistapp.database;
-    exports ru.practise.pet_projects.todolistapp.user;
-    opens ru.practise.pet_projects.todolistapp.user to javafx.fxml;
+    exports ru.practise.pet_projects.todolistapp.handlers;
+    opens ru.practise.pet_projects.todolistapp.handlers to javafx.fxml;
     exports ru.practise.pet_projects.todolistapp.registration_part.login;
     opens ru.practise.pet_projects.todolistapp.registration_part.login to javafx.fxml;
     exports ru.practise.pet_projects.todolistapp.emailCode;

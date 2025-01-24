@@ -17,9 +17,9 @@
             <Font name="Sitka Heading Bold" size="22.0" />
          </font>
       </Label>
-      <TextField fx:id="codeField" layoutX="40.0" layoutY="106.0" prefHeight="43.0" prefWidth="407.0" promptText="Введите код" style="-fx-background-color: #FAEBD7;" styleClass="text-field" stylesheets="@../StyleTextFields.css">
+      <TextField fx:id="codeField" layoutX="40.0" layoutY="106.0" onKeyPressed="#clearLabel" prefHeight="43.0" prefWidth="407.0" promptText="Введите код" style="-fx-background-color: #FAEBD7;" styleClass="text-field" stylesheets="@../StyleTextFields.css">
          <font>
-            <Font name="Sitka Heading Bold" size="20.0" />
+            <Font name="Sitka Heading Bold" size="19.0" />
          </font>
       </TextField>
       <Button fx:id="buttonContinue" ellipsisString="" layoutX="29.0" layoutY="265.0" mnemonicParsing="false" onAction="#Continue" prefHeight="53.0" prefWidth="429.0" styleClass="hover-button" stylesheets="@../StyleButtonEnter.css" text="Продолжить">
@@ -37,7 +37,7 @@
             <Font name="Sitka Heading Bold" size="24.0" />
          </font>
       </Button>
-      <Button fx:id="buttonSendCode" alignment="TOP_LEFT" layoutX="40.0" layoutY="166.0" mnemonicParsing="false" onAction="#sendCode" prefHeight="31.0" prefWidth="119.0" styleClass="hover-button" stylesheets="@../buttonSendCode.css" text="Отправить код">
+      <Button fx:id="buttonSendCode" alignment="TOP_LEFT" layoutX="40.0" layoutY="166.0" mnemonicParsing="false" onAction="#sendCode" prefHeight="31.0" prefWidth="185.0" styleClass="hover-button" stylesheets="@../buttonSendCode.css" text="Отправить код повторно">
          <font>
             <Font name="Sitka Heading Bold" size="14.0" />
          </font>

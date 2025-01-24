@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import ru.practise.pet_projects.todolistapp.MainApplication;
 
@@ -22,32 +23,16 @@ public class LogUpController {
     public static final String REGEX_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).*[a-zA-Z].*$";
 
     @FXML
-    private Button buttonBack;
+    private Button buttonBack, buttonContinue;
 
     @FXML
-    private Button buttonContinue;
+    private TextField email, password, username;
 
     @FXML
-    private TextField email;
+    private Label notCorrectPasswordOrEmail1, notCorrectPasswordOrEmail2, notCorrectUsername;
 
     @FXML
-    private Label notCorrectPasswordOrEmail1;
-
-    @FXML
-    private Label notCorrectPasswordOrEmail2;
-
-    @FXML
-    private Label notCorrectUsername;
-
-    @FXML
-    private TextField password;
-
-    @FXML
-    private TextField username;
-
-
-    @FXML
-    void BackToStartScreen(ActionEvent event) {
+    void BackToStartScreen(ActionEvent ignoredEvent) {
         try {
             createWindow();
         } catch (IOException e) {
@@ -63,24 +48,30 @@ public class LogUpController {
     }
 
     @FXML
-    void Continue(ActionEvent event) throws IOException {
+    void Continue(ActionEvent ignoredEvent) throws IOException {
         String stringEmail = email.getText();
         String stringUsername = username.getText();
         String stringPassword = password.getText();
         if (usernameIsCorrect(stringUsername) && emailIsCorrect(stringEmail) && passwordIsCorrect(stringPassword)) {
-            if (DATABASE.loginIsBusy(stringEmail)) {
+            if (DATABASE.loginIsBusy(stringEmail) && DATABASE.usernameIsBusy(stringUsername)) {
                 FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/logup/todoList-emailCodeScreen.fxml"));
                 Parent parent = fxmlLoader.load();
                 EmailCodeController emailCodeController = fxmlLoader.getController();
-                emailCodeController.setEmail(stringEmail);
-                emailCodeController.setUsername(stringUsername);
-                emailCodeController.setPassword(stringPassword);
+                emailCodeController.initialize(stringEmail, stringPassword, stringUsername);
                 Stage stage = (Stage) buttonContinue.getScene().getWindow();
                 stage.setScene(new Scene(parent, 501, 442));
                 stage.show();
+            } else if (!DATABASE.loginIsBusy(stringEmail)) {
+                email.getStyleClass().add("highlighted");
+                notCorrectPasswordOrEmail1.setText("\uD83D\uDEABЭтот адрес электронной почты уже зарегистрирован в приложение!");
+            } else if (!DATABASE.usernameIsBusy(stringUsername)) {
+                username.getStyleClass().add("highlighted");
+                notCorrectUsername.setText("\uD83D\uDEABЭто имя пользователя занято!");
             } else {
                 email.getStyleClass().add("highlighted");
                 notCorrectPasswordOrEmail1.setText("\uD83D\uDEABЭтот адрес электронной почты уже зарегистрирован в приложение!");
+                username.getStyleClass().add("highlighted");
+                notCorrectUsername.setText("\uD83D\uDEABЭто имя пользователя занято!");
             }
         } else if (!usernameIsCorrect(stringUsername)) {
             username.getStyleClass().add("highlighted");
@@ -111,8 +102,18 @@ public class LogUpController {
         return false;
     }
 
-    String getEmail() {
-        return email.getText();
+    @FXML
+    void clearLabel(KeyEvent ignoredEvent) {
+        notCorrectPasswordOrEmail1.setText("");
+        notCorrectPasswordOrEmail2.setText("");
+        email.getStyleClass().remove("highlighted");
+        password.getStyleClass().remove("highlighted");
+    }
+
+    @FXML
+    void clearLabelUsername(KeyEvent ignoredEvent) {
+        notCorrectUsername.setText("");
+        username.getStyleClass().remove("highlighted");
     }
 }
 

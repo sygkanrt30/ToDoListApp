@@ -4,13 +4,16 @@ package ru.practise.pet_projects.todolistapp.registration_part.logup;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import ru.practise.pet_projects.todolistapp.MainApplication;
 import ru.practise.pet_projects.todolistapp.emailCode.EmailChecker;
+import ru.practise.pet_projects.todolistapp.main_part.MainBodyController;
 
 import java.io.IOException;
 
@@ -18,33 +21,23 @@ import static ru.practise.pet_projects.todolistapp.registration_part.login.Start
 
 
 public class EmailCodeController {
-    private int k = 6;
+    private int k = 4;
     private final EmailChecker emailChecker = new EmailChecker();
     private String email;
     private String password;
     private String username;
 
     @FXML
-    private Button buttonBack;
-
-    @FXML
-    private Button buttonContinue;
-
-    @FXML
-    private Button buttonSendCode;
+    private Button buttonBack, buttonContinue, buttonSendCode;
 
     @FXML
     private TextField codeField;
 
     @FXML
-    private Label notCorrectCode;
+    private Label notCorrectCode, countTries;
 
     @FXML
-    private Label countTries;
-
-
-    @FXML
-    void BackToLogUpScreen(ActionEvent event) {
+    void BackToLogUpScreen(ActionEvent ignoredEvent) {
         try {
             createWindow();
         } catch (IOException e) {
@@ -60,13 +53,15 @@ public class EmailCodeController {
     }
 
     @FXML
-    void Continue(ActionEvent event) throws IOException {
+    void Continue(ActionEvent ignoredEvent) throws IOException {
         if (emailChecker.getCode().equals(codeField.getText().trim())) {
             DATABASE.insertUser(email, password, username);
-            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("src/main/resources/ru/practise/pet_projects/" +
-                    "todolistapp/main_part/todoList-MainBody.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/todoList-mainPart.fxml"));
+            Parent parent = fxmlLoader.load();
+            MainBodyController mainBodyController = fxmlLoader.getController();
+            mainBodyController.initialize(username);
             Stage stage = (Stage) buttonContinue.getScene().getWindow();
-            stage.setScene(new Scene(fxmlLoader.load(), 860, 559));
+            stage.setScene(new Scene(parent, 945, 726));
             stage.show();
         } else {
             codeField.getStyleClass().add("highlighted");
@@ -75,15 +70,9 @@ public class EmailCodeController {
     }
 
     @FXML
-    void sendCode(ActionEvent event) {
-        if (k == 6) {
-            emailChecker.sendCheckCodeTo(email);
-            buttonSendCode.setText("Отправить код повторно");
-            buttonSendCode.setPrefWidth(192);
-            k--;
-            countTries.setText("Осталось попыток: " + k);
-        } else if (k > 0) {
-            emailChecker.sendCheckCodeTo(email);
+    void sendCode(ActionEvent ignoredEvent) {
+        if (k > 0) {
+            emailChecker.sendCodeToCheck(email);
             k--;
             countTries.setText("Осталось попыток: " + k);
         } else {
@@ -91,15 +80,17 @@ public class EmailCodeController {
         }
     }
 
-    public void setEmail(String email) {
+    @FXML
+    public void initialize(String email, String password, String username) {
         this.email = email;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
+        this.username = username;
+        emailChecker.sendCodeToCheck(email);
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    @FXML
+    void clearLabel(KeyEvent ignoredEvent) {
+        notCorrectCode.setText("");
+        codeField.getStyleClass().remove("highlighted");
     }
 }
