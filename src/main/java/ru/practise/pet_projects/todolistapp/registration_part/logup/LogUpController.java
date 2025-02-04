@@ -40,13 +40,6 @@ public class LogUpController {
         }
     }
 
-    void createWindow() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/login/todoList-startScreen.fxml"));
-        Stage stage = (Stage) buttonBack.getScene().getWindow();
-        stage.setScene(new Scene(fxmlLoader.load(), 501, 546));
-        stage.show();
-    }
-
     @FXML
     void Continue(ActionEvent ignoredEvent) throws IOException {
         String stringEmail = email.getText();
@@ -54,13 +47,7 @@ public class LogUpController {
         String stringPassword = password.getText();
         if (usernameIsCorrect(stringUsername) && emailIsCorrect(stringEmail) && passwordIsCorrect(stringPassword)) {
             if (DATABASE.loginIsBusy(stringEmail) && DATABASE.usernameIsBusy(stringUsername)) {
-                FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/logup/todoList-emailCodeScreen.fxml"));
-                Parent parent = fxmlLoader.load();
-                EmailCodeController emailCodeController = fxmlLoader.getController();
-                emailCodeController.initialize(stringEmail, stringPassword, stringUsername);
-                Stage stage = (Stage) buttonContinue.getScene().getWindow();
-                stage.setScene(new Scene(parent, 501, 442));
-                stage.show();
+                createEmailCodeCheckerWindow(stringEmail, stringPassword, stringUsername);
             } else if (!DATABASE.loginIsBusy(stringEmail)) {
                 email.getStyleClass().add("highlighted");
                 notCorrectPasswordOrEmail1.setText("\uD83D\uDEABЭтот адрес электронной почты уже зарегистрирован в приложение!");
@@ -84,18 +71,37 @@ public class LogUpController {
         }
     }
 
-    boolean usernameIsCorrect(String username) {
+    private void createWindow() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
+                "login/todoList-startScreen.fxml"));
+        Stage stage = (Stage) buttonBack.getScene().getWindow();
+        stage.setScene(new Scene(fxmlLoader.load(), 501, 546));
+        stage.show();
+    }
+
+    private void createEmailCodeCheckerWindow(String stringEmail, String stringPassword, String stringUsername) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
+                "logup/todoList-emailCodeScreen.fxml"));
+        Parent parent = fxmlLoader.load();
+        EmailCodeController emailCodeController = fxmlLoader.getController();
+        emailCodeController.initialize(stringEmail, stringPassword, stringUsername);
+        Stage stage = (Stage) buttonContinue.getScene().getWindow();
+        stage.setScene(new Scene(parent, 501, 442));
+        stage.show();
+    }
+
+    private boolean usernameIsCorrect(String username) {
         if (username.length() > 2 && username.length() < 16) {
             return username.matches(REGEX_USERNAME);
         }
         return false;
     }
 
-    boolean emailIsCorrect(String email) {
+    private boolean emailIsCorrect(String email) {
         return email.matches(REGEX_EMAIL);
     }
 
-    boolean passwordIsCorrect(String password) {
+    private boolean passwordIsCorrect(String password) {
         if (password.length() > 7 && password.length() < 17) {
             return password.matches(REGEX_PASSWORD);
         }

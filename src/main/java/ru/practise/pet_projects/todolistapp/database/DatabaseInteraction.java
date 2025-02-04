@@ -136,33 +136,6 @@ public class DatabaseInteraction {
         return tasks;
     }
 
-    public void deleteAllTasks(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ALL_TASKS)) {
-            preparedStatement.setString(1, username);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void deleteAllExecuteTasks(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ALL_COMPLETED_TASKS)) {
-            preparedStatement.setString(1, username);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void executeAllTasks(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(EXECUTE_ALL_TASKS)) {
-            preparedStatement.setString(1, username);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public void renameTask(String username, String newContent, Task selectedTask) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(RENAME_TASK)) {
             preparedStatement.setString(1, newContent);
@@ -176,32 +149,41 @@ public class DatabaseInteraction {
         }
     }
 
+    public void deleteAllTasks(String username) {
+        requestForAllTasks(username, DELETE_ALL_TASKS);
+    }
+
+    public void deleteAllExecuteTasks(String username) {
+        requestForAllTasks(username, DELETE_ALL_COMPLETED_TASKS);
+    }
+
+    public void executeAllTasks(String username) {
+        requestForAllTasks(username, EXECUTE_ALL_TASKS);
+    }
+
     public void removeTask(String username, Task selectedTask) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TASK)) {
-            preparedStatement.setString(1, username);
-            preparedStatement.setString(2, selectedTask.getContent());
-            preparedStatement.setString(3, selectedTask.getPriority());
-            preparedStatement.setString(4, selectedTask.getDedline());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        delAndExecuteTask(username, selectedTask, DELETE_TASK);
     }
 
     public void executeTask(String username, Task selectedTask) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(EXECUTE_TASK)) {
+        delAndExecuteTask(username, selectedTask, EXECUTE_TASK);
+    }
+
+    public void canselExecutionTask(String username, Task selectedTask) {
+        delAndExecuteTask(username, selectedTask, CANSEL_EXECUTION_TASK);
+    }
+
+    private void requestForAllTasks(String username, String request) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(request)) {
             preparedStatement.setString(1, username);
-            preparedStatement.setString(2, selectedTask.getContent());
-            preparedStatement.setString(3, selectedTask.getPriority());
-            preparedStatement.setString(4, selectedTask.getDedline());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void canselExecutionTask(String username, Task selectedTask) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CANSEL_EXECUTION_TASK)) {
+    private void delAndExecuteTask(String username, Task selectedTask, String request) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(request)) {
             preparedStatement.setString(1, username);
             preparedStatement.setString(2, selectedTask.getContent());
             preparedStatement.setString(3, selectedTask.getPriority());

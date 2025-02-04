@@ -37,39 +37,43 @@ public class StartMenuController {
     @FXML
     void CreateAccount(ActionEvent ignoredEvent) {
         try {
-            createWindow();
+            createLogUpWindow();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    void createWindow() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/logup/todoList-logUpScreen.fxml"));
-        Stage stage = (Stage) buttonCreateAccount.getScene().getWindow();
-        stage.setScene(new Scene(fxmlLoader.load(), 511, 716));
-        stage.show();
-    }
-
     @FXML
     void Enter(ActionEvent ignoredEvent) throws IOException {
-        String email = emailField.getText();
         String password = passwordField.getText();
-        User user = DATABASE.getUsersInfo(email);
+        User user = DATABASE.getUsersInfo(emailField.getText());
         if (user != null && password.equals(user.getPassword())) {
-            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/todoList-mainPart.fxml"));
-            Parent parent = fxmlLoader.load();
-            MainBodyController mainBodyController = fxmlLoader.getController();
-            mainBodyController.initialize(user.getUsername());
-            Stage stage = (Stage) buttonEnter.getScene().getWindow();
-            stage.setScene(new Scene(parent, 945, 726));
-            stage.show();
+            createMainWindow(user);
         } else {
             emailField.getStyleClass().add("highlighted");
             passwordField.getStyleClass().add("highlighted");
             notCorrectPasswordOrEmail1.setText("\uD83D\uDEABНеверный адрес электронной почты или пароль!");
             notCorrectPasswordOrEmail2.setText("\uD83D\uDEABНеверный адрес электронной почты или пароль!");
         }
+    }
 
+    private void createLogUpWindow() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
+                "logup/todoList-logUpScreen.fxml"));
+        Stage stage = (Stage) buttonCreateAccount.getScene().getWindow();
+        stage.setScene(new Scene(fxmlLoader.load(), 511, 716));
+        stage.show();
+    }
+
+    private void createMainWindow(User user) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/" +
+                "todoList-mainPart.fxml"));
+        Parent parent = fxmlLoader.load();
+        MainBodyController mainBodyController = fxmlLoader.getController();
+        mainBodyController.initialize(user.getUsername());
+        Stage stage = (Stage) buttonEnter.getScene().getWindow();
+        stage.setScene(new Scene(parent, 945, 726));
+        stage.show();
     }
 
     @FXML

@@ -65,16 +65,20 @@ public class MainBodyController {
             table.getItems().clear();
             DATABASE.insertTask(username, contentTask, stringPriority, stringDedline, NOT_COMPLETED);
             complectionTable();
-            task.setText("");
-            priority.setText("");
-            stringPriority = "Приоритет 4";
-            dedline.setValue(null);
+            resetParameters();
 
         } else {
             notCorrectFieldFill.setText("Поле содержания задачи не должно быть пустым!!!");
         }
         notCorrectRenameFieldFill.setText("");
         taskNotSelected.setText("");
+    }
+
+    private void resetParameters() {
+        task.setText("");
+        priority.setText("");
+        stringPriority = "Приоритет 4";
+        dedline.setValue(null);
     }
 
     private boolean isSameTask(String contentTask, String stringDedline, Label notCorrectFieldFill) {
@@ -120,10 +124,7 @@ public class MainBodyController {
     void removeAllCompletedTasks(ActionEvent ignoredEvent) {
         DATABASE.deleteAllExecuteTasks(username);
         table.getItems().removeIf(item -> item.getStatus().equals("выполнено"));
-        selectedTask = null;
-        notCorrectRenameFieldFill.setText("");
-        notCorrectFieldFill.setText("");
-        taskNotSelected.setText("");
+        clearLabelsAndSelectedTask();
     }
 
     @FXML
@@ -131,16 +132,17 @@ public class MainBodyController {
         table.getItems().clear();
         DATABASE.executeAllTasks(username);
         complectionTable();
-        selectedTask = null;
-        notCorrectRenameFieldFill.setText("");
-        notCorrectFieldFill.setText("");
-        taskNotSelected.setText("");
+        clearLabelsAndSelectedTask();
     }
 
     @FXML
     void removeAllTasks(ActionEvent ignoredEvent) {
         DATABASE.deleteAllTasks(username);
         table.getItems().clear();
+        clearLabelsAndSelectedTask();
+    }
+
+    private void clearLabelsAndSelectedTask() {
         selectedTask = null;
         notCorrectRenameFieldFill.setText("");
         notCorrectFieldFill.setText("");
@@ -157,7 +159,8 @@ public class MainBodyController {
     }
 
     void createWindow() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/login/todoList-startScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
+                "login/todoList-startScreen.fxml"));
         Stage stage = (Stage) buttonExit.getScene().getWindow();
         stage.setScene(new Scene(fxmlLoader.load(), 501, 546));
         stage.show();
@@ -227,9 +230,7 @@ public class MainBodyController {
         table.getItems().removeIf(item -> item.getContent().equals(selectedTask.getContent()) &&
                 item.getPriority().equals(selectedTask.getPriority()) &&
                 item.getDedline().equals(selectedTask.getDedline()));
-        selectedTask = null;
-        notCorrectRenameFieldFill.setText("");
-        notCorrectFieldFill.setText("");
+        clearLabelsAndSelectedTask();
     }
 
     @FXML
@@ -249,7 +250,6 @@ public class MainBodyController {
             complectionTable();
             renameTask.setText("");
             dedline.setValue(null);
-
         } else {
             notCorrectRenameFieldFill.setText("Поле содержания задачи не должно быть пустым!!!");
         }
@@ -260,36 +260,28 @@ public class MainBodyController {
     @FXML
     void setPriority1(ActionEvent ignoredEvent) {
         stringPriority = "Приоритет 1";
-        priority.setText(stringPriority);
-        if (notCorrectFieldFill.getText().equals("Точно такая же задача уже есть в списке!!!")) {
-            notCorrectFieldFill.setText("");
-        }
-        notCorrectRenameFieldFill.setText("");
+        setPrioritiesAndClearLabels();
     }
 
     @FXML
     void setPriority2(ActionEvent ignoredEvent) {
         stringPriority = "Приоритет 2";
-        priority.setText(stringPriority);
-        if (notCorrectFieldFill.getText().equals("Точно такая же задача уже есть в списке!!!")) {
-            notCorrectFieldFill.setText("");
-        }
-        notCorrectRenameFieldFill.setText("");
+        setPrioritiesAndClearLabels();
     }
 
     @FXML
     void setPriority3(ActionEvent ignoredEvent) {
         stringPriority = "Приоритет 3";
-        priority.setText(stringPriority);
-        if (notCorrectFieldFill.getText().equals("Точно такая же задача уже есть в списке!!!")) {
-            notCorrectFieldFill.setText("");
-        }
-        notCorrectRenameFieldFill.setText("");
+        setPrioritiesAndClearLabels();
     }
 
     @FXML
     void setPriority4(ActionEvent ignoredEvent) {
         stringPriority = "Приоритет 4";
+        setPrioritiesAndClearLabels();
+    }
+
+    private void setPrioritiesAndClearLabels() {
         priority.setText(stringPriority);
         if (notCorrectFieldFill.getText().equals("Точно такая же задача уже есть в списке!!!")) {
             notCorrectFieldFill.setText("");

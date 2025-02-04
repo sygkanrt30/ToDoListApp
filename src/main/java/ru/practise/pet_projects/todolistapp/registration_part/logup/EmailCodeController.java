@@ -39,34 +39,40 @@ public class EmailCodeController {
     @FXML
     void BackToLogUpScreen(ActionEvent ignoredEvent) {
         try {
-            createWindow();
+            createLogUpWindow();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    void createWindow() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/logup/todoList-logUpScreen.fxml"));
-        Stage stage = (Stage) buttonBack.getScene().getWindow();
-        stage.setScene(new Scene(fxmlLoader.load(), 511, 716));
-        stage.show();
     }
 
     @FXML
     void Continue(ActionEvent ignoredEvent) throws IOException {
         if (emailChecker.getCode().equals(codeField.getText().trim())) {
             DATABASE.insertUser(email, password, username);
-            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/todoList-mainPart.fxml"));
-            Parent parent = fxmlLoader.load();
-            MainBodyController mainBodyController = fxmlLoader.getController();
-            mainBodyController.initialize(username);
-            Stage stage = (Stage) buttonContinue.getScene().getWindow();
-            stage.setScene(new Scene(parent, 945, 726));
-            stage.show();
+            createMainWindow();
         } else {
             codeField.getStyleClass().add("highlighted");
             notCorrectCode.setText("\uD83D\uDEAB Неверный код подтверждения!");
         }
+    }
+
+    private void createLogUpWindow() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
+                "logup/todoList-logUpScreen.fxml"));
+        Stage stage = (Stage) buttonBack.getScene().getWindow();
+        stage.setScene(new Scene(fxmlLoader.load(), 511, 716));
+        stage.show();
+    }
+
+    private void createMainWindow() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/" +
+                "todoList-mainPart.fxml"));
+        Parent parent = fxmlLoader.load();
+        MainBodyController mainBodyController = fxmlLoader.getController();
+        mainBodyController.initialize(username);
+        Stage stage = (Stage) buttonContinue.getScene().getWindow();
+        stage.setScene(new Scene(parent, 945, 726));
+        stage.show();
     }
 
     @FXML
