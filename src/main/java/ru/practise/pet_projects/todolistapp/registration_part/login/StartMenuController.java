@@ -18,7 +18,11 @@ import ru.practise.pet_projects.todolistapp.main_part.MainBodyController;
 
 import java.io.IOException;
 
-
+/**
+ * The {@code StartMenuController} class manages the user interface and logic for the start menu of the application.
+ * It handles user interactions for account creation and user login, validates user credentials,
+ * and navigates between different screens of the application.
+ */
 public class StartMenuController {
     public static final DatabaseInteraction DATABASE = new DatabaseInteraction();
 
@@ -34,6 +38,11 @@ public class StartMenuController {
     @FXML
     private PasswordField passwordField;
 
+    /**
+     * Navigates to the account creation screen when the create account button is pressed.
+     *
+     * @param ignoredEvent The ActionEvent triggered by the button press.
+     */
     @FXML
     void CreateAccount(ActionEvent ignoredEvent) {
         try {
@@ -43,6 +52,13 @@ public class StartMenuController {
         }
     }
 
+    /**
+     * Validates the entered email and password, and logs the user in if the credentials are correct.
+     * If the credentials are incorrect, it displays an error message.
+     *
+     * @param ignoredEvent The ActionEvent triggered by the button press.
+     * @throws IOException If an input or output exception occurs while loading the next scene.
+     */
     @FXML
     void Enter(ActionEvent ignoredEvent) throws IOException {
         String password = passwordField.getText();
@@ -57,6 +73,11 @@ public class StartMenuController {
         }
     }
 
+    /**
+     * Creates and displays the account creation window.
+     *
+     * @throws IOException If an input or output exception occurs while loading the FXML file.
+     */
     private void createLogUpWindow() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
                 "logup/todoList-logUpScreen.fxml"));
@@ -65,6 +86,12 @@ public class StartMenuController {
         stage.show();
     }
 
+    /**
+     * Creates and displays the main application window after a successful login.
+     *
+     * @param user The User object representing the logged-in user.
+     * @throws IOException If an input or output exception occurs while loading the FXML file.
+     */
     private void createMainWindow(User user) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/" +
                 "todoList-mainPart.fxml"));
@@ -76,6 +103,11 @@ public class StartMenuController {
         stage.show();
     }
 
+    /**
+     * Clears error messages and highlighted styles when a key is pressed in the input fields.
+     *
+     * @param ignoredEvent The KeyEvent triggered by a key press.
+     */
     @FXML
     void clearLabel(KeyEvent ignoredEvent) {
         notCorrectPasswordOrEmail1.setText("");

@@ -7,6 +7,11 @@ import ru.practise.pet_projects.todolistapp.handlers.User;
 
 import java.sql.*;
 
+/**
+ * The {@code DatabaseInteraction} class is responsible for managing interactions
+ * with the database for the ToDoList application. It provides methods to execute
+ * various SQL queries related to user and task management.
+ */
 public class DatabaseInteraction {
     private static Connection connection;
     public static final String USER_INFO_SELECT_BY_LOGIN = """
@@ -38,6 +43,14 @@ public class DatabaseInteraction {
     public static final String CANSEL_EXECUTION_TASK = "UPDATE tasks_content SET status = 'не выполнено' " +
             "WHERE username = (?) AND contents = (?) AND priority = (?) AND dedlines = (?)";
 
+    /**
+     * Constructs a new instance of the DatabaseInteraction class.
+     * This constructor attempts to establish a connection to a PostgreSQL database
+     * using the specified URL, username, and password. If the connection is successful,
+     * a message indicating successful initialization is printed to the console.
+     *
+     * @throws RuntimeException If there is an error establishing the database connection.
+     */
     public DatabaseInteraction() {
         try {
             connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/ToDoListApp", "postgres", "5432");
@@ -47,6 +60,16 @@ public class DatabaseInteraction {
         System.out.println("Инициализация BD прошла успешно!!!");
     }
 
+    /**
+     * Retrieves user information from the database based on the provided {@code login}.
+     * This method executes a SQL query to select user information associated with the given login.
+     * If a user is found, it creates and returns a {@code User}.
+     * If no user is found, it returns {@code null}.
+     *
+     * @param login The login of the user whose information is to be retrieved.
+     * @return A {@code User} object containing the user's information, or null if no user is found.
+     * @throws RuntimeException If there is an error executing the SQL query.
+     */
     public User getUsersInfo(String login) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(USER_INFO_SELECT_BY_LOGIN)) {
             preparedStatement.setString(1, login);
@@ -64,6 +87,15 @@ public class DatabaseInteraction {
         return null;
     }
 
+    /**
+     * Inserts a new user into the database with the provided {@code login}, {@code password}, and {@code username}.
+     * This method prepares and executes an SQL statement to insert a new user record into the database.
+     *
+     * @param login    The login of the user to be inserted.
+     * @param password The password of the user to be inserted.
+     * @param username The username of the user to be inserted.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void insertUser(String login, String password, String username) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER)) {
             preparedStatement.setString(1, login);
@@ -75,6 +107,14 @@ public class DatabaseInteraction {
         }
     }
 
+    /**
+     * This method executes a SQL query to determine if a user with the given {@code login}
+     * exists in the database.
+     *
+     * @param login The login to check for availability.
+     * @return true if the login is available, false if it is already in use.
+     * @throws RuntimeException If there is an error executing the SQL query.
+     */
     public boolean loginIsBusy(String login) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(USER_INFO_SELECT_BY_LOGIN)) {
             preparedStatement.setString(1, login);
@@ -89,6 +129,14 @@ public class DatabaseInteraction {
         return true;
     }
 
+    /**
+     * This method executes a SQL query to determine if a user with the given {@code username}
+     * exists in the database.
+     *
+     * @param username The username to check for availability.
+     * @return true if the username is available, false if it is already in use.
+     * @throws RuntimeException If there is an error executing the SQL query.
+     */
     public boolean usernameIsBusy(String username) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(USER_INFO_SELECT_BY_USERNAME)) {
             preparedStatement.setString(1, username);
@@ -103,6 +151,17 @@ public class DatabaseInteraction {
         return true;
     }
 
+    /**
+     * This method prepares and executes an SQL statement to insert a new task record
+     * into the database. If the insertion is successful, the task is added to the database.
+     *
+     * @param username The username of the user to whom the task belongs.
+     * @param content  The content or description of the task.
+     * @param priority The priority level of the task.
+     * @param dedline  The deadline for the task.
+     * @param done     The status of the task (e.g., completed or not).
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void insertTask(String username, String content, String priority, String dedline, String done) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TASK)) {
             preparedStatement.setString(1, username);
@@ -116,6 +175,15 @@ public class DatabaseInteraction {
         }
     }
 
+    /**
+     * Retrieves a list of tasks associated with the specified username from the database.
+     * This method executes a SQL query to select all tasks belonging to the given user.
+     * It creates and returns a list of {@code Task} objects containing the details of each task.
+     *
+     * @param username The username of the user whose tasks are to be retrieved.
+     * @return {@link ObservableList} of {@code Task} objects containing the user's tasks.
+     * @throws RuntimeException If there is an error executing the SQL query.
+     */
     public ObservableList<Task> getTasks(String username) {
         ObservableList<Task> tasks = FXCollections.observableArrayList();
         try (PreparedStatement preparedStatement = connection.prepareStatement(TASKS_INFO_SELECT_BY_USERNAME)) {
@@ -136,6 +204,17 @@ public class DatabaseInteraction {
         return tasks;
     }
 
+    /**
+     * Renames an existing task in the database with the specified new content.
+     * This method prepares and executes an SQL statement to update the content of a task.
+     * The task to be renamed is identified by its current {@code content}, {@code priority}, and {@code deadline}.
+     *
+     * @param username     The username of the user who owns the task to be renamed.
+     * @param newContent   The new content or description for the task.
+     * @param selectedTask The Task object representing the task to be renamed, which contains
+     *                     the current content, priority, and deadline of the task.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void renameTask(String username, String newContent, Task selectedTask) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(RENAME_TASK)) {
             preparedStatement.setString(1, newContent);
@@ -149,30 +228,80 @@ public class DatabaseInteraction {
         }
     }
 
+    /**
+     * Deletes all tasks associated with the specified user from the database.
+     * This method calls a helper method to execute the SQL statement for deleting all tasks.
+     *
+     * @param username The username of the user whose tasks are to be deleted.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void deleteAllTasks(String username) {
         requestForAllTasks(username, DELETE_ALL_TASKS);
     }
 
+    /**
+     * Deletes all completed tasks associated with the specified user from the database.
+     * This method calls a helper method to execute the SQL statement for deleting all completed tasks.
+     *
+     * @param username The username of the user whose completed tasks are to be deleted.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void deleteAllExecuteTasks(String username) {
         requestForAllTasks(username, DELETE_ALL_COMPLETED_TASKS);
     }
 
+    /**
+     * Executes all tasks associated with the specified user in the database.
+     * This method calls a helper method to execute the SQL statement for executing all tasks.
+     *
+     * @param username The username of the user whose tasks are to be executed.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void executeAllTasks(String username) {
         requestForAllTasks(username, EXECUTE_ALL_TASKS);
     }
 
+    /**
+     * This method calls a helper method to execute the SQL statement for deleting the specified task.
+     *
+     * @param username     The username of the user who owns the task to be removed.
+     * @param selectedTask The {@code Task} representing the task to be removed.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void removeTask(String username, Task selectedTask) {
         delAndExecuteTask(username, selectedTask, DELETE_TASK);
     }
 
+    /**
+     * This method calls a helper method to execute the SQL statement for executing the specified task.
+     *
+     * @param username     The username of the user who owns the task to be executed.
+     * @param selectedTask The {@code Task} representing the task to be executed.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void executeTask(String username, Task selectedTask) {
         delAndExecuteTask(username, selectedTask, EXECUTE_TASK);
     }
 
+    /**
+     * This method calls a helper method to execute the SQL statement for canceling the execution of the specified task.
+     *
+     * @param username     The username of the user who owns the task to be canceled.
+     * @param selectedTask The {@code Task} representing the task to be canceled.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     public void canselExecutionTask(String username, Task selectedTask) {
         delAndExecuteTask(username, selectedTask, CANSEL_EXECUTION_TASK);
     }
 
+    /**
+     * Executes a SQL statement to request all tasks associated with the specified username.
+     * This method prepares and executes the SQL statement for the given request.
+     *
+     * @param username The username of the user whose tasks are to be requested.
+     * @param request  The SQL statement to be executed.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     private void requestForAllTasks(String username, String request) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(request)) {
             preparedStatement.setString(1, username);
@@ -182,6 +311,15 @@ public class DatabaseInteraction {
         }
     }
 
+    /**
+     * Executes a SQL statement to delete or execute a specific task associated with the specified user.
+     * This method prepares and executes the SQL statement for the given request.
+     *
+     * @param username     The username of the user who owns the task.
+     * @param selectedTask The {@code Task} representing the task to be deleted or executed.
+     * @param request      The SQL statement to be executed.
+     * @throws RuntimeException If there is an error executing the SQL statement.
+     */
     private void delAndExecuteTask(String username, Task selectedTask, String request) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(request)) {
             preparedStatement.setString(1, username);
@@ -194,3 +332,5 @@ public class DatabaseInteraction {
         }
     }
 }
+
+
