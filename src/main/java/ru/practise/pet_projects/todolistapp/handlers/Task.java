@@ -1,8 +1,9 @@
 package ru.practise.pet_projects.todolistapp.handlers;
 
 import javafx.beans.property.SimpleStringProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-import java.util.Objects;
 
 /**
  * The {@code Task} class represents a task in a to-do list application.
@@ -10,6 +11,8 @@ import java.util.Objects;
  * It provides methods to access these properties, as well as methods
  * for equality comparison and string representation.
  */
+@ToString
+@EqualsAndHashCode
 public class Task {
     private final SimpleStringProperty content;
     private final SimpleStringProperty priority;
@@ -65,46 +68,5 @@ public class Task {
      */
     public String getStatus() {
         return status.get();
-    }
-
-    /**
-     * Returns a string representation of the Task instance.
-     *
-     * @return A string representation of the Task, including content, priority, and deadline.
-     */
-    @Override
-    public String toString() {
-        return "Task{" +
-                "content='" + content + '\'' +
-                ", priority='" + priority + '\'' +
-                ", dedline=" + dedline +
-                '}';
-    }
-
-    /**
-     * Compares this Task instance to the specified object for equality.
-     * Two Task instances are considered equal if their content, priority, and deadline are the same.
-     *
-     * @param o The object to compare this Task against.
-     * @return true if the specified object is equal to this Task; false otherwise.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
-        return Objects.equals(content.get(), task.content.get()) &&
-                Objects.equals(priority.get(), task.priority.get()) &&
-                Objects.equals(dedline.get(), task.dedline.get());
-    }
-
-    /**
-     * Returns a hash code value for this Task instance.
-     *
-     * @return A hash code value for this Task.
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(content.get(), priority.get(), dedline.get());
     }
 }

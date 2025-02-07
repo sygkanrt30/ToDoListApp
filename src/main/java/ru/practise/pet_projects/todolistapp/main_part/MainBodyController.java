@@ -12,6 +12,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.MainApplication;
 import ru.practise.pet_projects.todolistapp.handlers.Task;
 
@@ -35,6 +37,7 @@ public class MainBodyController {
     private static final String COMPLETED = "выполнено";
     private static final String NOT_COMPLETED = "не выполнено";
     private Task selectedTask;
+    public static final Logger LOGGER = LogManager.getLogger(MainBodyController.class);
     @FXML
     private Button buttonCreateTask, buttonExecuteAllTasks, buttonRemoveAllTCompletedTasks, buttonRemoveAllTasks, buttonExit,
             buttonExecute, buttonRemove, buttonRename;
@@ -244,6 +247,7 @@ public class MainBodyController {
         try {
             createWindow();
         } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -363,7 +367,7 @@ public class MainBodyController {
             taskNotSelected.setText("Задача для действия не выбрана!!!");
             return;
         }
-        DATABASE.removeTask(username, selectedTask);
+        DATABASE.deleteTask(username, selectedTask);
         table.getItems().removeIf(item -> item.getContent().equals(selectedTask.getContent()) &&
                 item.getPriority().equals(selectedTask.getPriority()) &&
                 item.getDedline().equals(selectedTask.getDedline()));

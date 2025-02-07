@@ -2,10 +2,18 @@ package ru.practise.pet_projects.todolistapp.database;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.handlers.Task;
 import ru.practise.pet_projects.todolistapp.handlers.User;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.Properties;
+
 
 /**
  * The {@code DatabaseInteraction} class is responsible for managing interactions
@@ -13,35 +21,9 @@ import java.sql.*;
  * various SQL queries related to user and task management.
  */
 public class DatabaseInteraction {
+    public static final Logger LOGGER = LogManager.getLogger(DatabaseInteraction.class);
     private static Connection connection;
-    public static final String USER_INFO_SELECT_BY_LOGIN = """
-            SELECT * FROM users
-            WHERE login = (?);
-            """;
-    public static final String USER_INFO_SELECT_BY_USERNAME = """
-            SELECT * FROM users
-            WHERE username = (?);
-            """;
-    public static final String TASKS_INFO_SELECT_BY_USERNAME = """
-            SELECT contents,priority,dedlines,status FROM tasks_content
-            WHERE username = (?);
-            """;
-    public static final String INSERT_USER = "INSERT INTO users (login, password, username) VALUES (?, ?, ?)";
-    public static final String INSERT_TASK = "INSERT INTO tasks_content (username, contents, priority, dedlines, status) " +
-            "VALUES (?, ?, ?, ?, ?)";
-    public static final String DELETE_ALL_TASKS = "DELETE FROM tasks_content WHERE username = (?)";
-    public static final String DELETE_ALL_COMPLETED_TASKS = "DELETE FROM tasks_content " +
-            "WHERE username = (?) AND status = 'выполнено'";
-    public static final String EXECUTE_ALL_TASKS = "UPDATE tasks_content SET status = 'выполнено' " +
-            "WHERE username = (?) AND status = 'не выполнено'";
-    public static final String RENAME_TASK = "UPDATE tasks_content SET contents = (?) " +
-            "WHERE username = (?) AND contents = (?) AND priority = (?) AND dedlines = (?)";
-    public static final String DELETE_TASK = "DELETE FROM tasks_content " +
-            "WHERE username = (?) AND contents = (?) AND priority = (?) AND dedlines = (?)";
-    public static final String EXECUTE_TASK = "UPDATE tasks_content SET status = 'выполнено' " +
-            "WHERE username = (?) AND contents = (?) AND priority = (?) AND dedlines = (?)";
-    public static final String CANSEL_EXECUTION_TASK = "UPDATE tasks_content SET status = 'не выполнено' " +
-            "WHERE username = (?) AND contents = (?) AND priority = (?) AND dedlines = (?)";
+    private static final Properties QUERIES = new Properties();
 
     /**
      * Constructs a new instance of the DatabaseInteraction class.
@@ -57,7 +39,22 @@ public class DatabaseInteraction {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Инициализация BD прошла успешно!!!");
+        LOGGER.info("Инициализация BD прошла успешно!!!");
+        try (InputStream input = getClass().getResourceAsStream("queries.sql")) {
+            if (input == null) {
+                throw new IOException("Файл не найден");
+            }
+            try (InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
+                QUERIES.load(reader);
+            }
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new RuntimeException("Failed to load SQL queries", e);
+        }
+    }
+
+    public static String getQuery(String key) {
+        return QUERIES.getProperty(key);
     }
 
     /**
@@ -71,7 +68,8 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL query.
      */
     public User getUsersInfo(String login) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(USER_INFO_SELECT_BY_LOGIN)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
+                USER_INFO_SELECT_BY_LOGIN.getName()))) {
             preparedStatement.setString(1, login);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
@@ -82,6 +80,7 @@ public class DatabaseInteraction {
                 }
             }
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
         return null;
@@ -97,12 +96,14 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void insertUser(String login, String password, String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
+                INSERT_USER.getName()))) {
             preparedStatement.setString(1, login);
             preparedStatement.setString(2, password);
             preparedStatement.setString(3, username);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -116,7 +117,8 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL query.
      */
     public boolean loginIsBusy(String login) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(USER_INFO_SELECT_BY_LOGIN)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
+                USER_INFO_SELECT_BY_LOGIN.getName()))) {
             preparedStatement.setString(1, login);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
@@ -124,6 +126,7 @@ public class DatabaseInteraction {
                 }
             }
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
         return true;
@@ -138,7 +141,8 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL query.
      */
     public boolean usernameIsBusy(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(USER_INFO_SELECT_BY_USERNAME)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
+                USER_INFO_SELECT_BY_USERNAME.getName()))) {
             preparedStatement.setString(1, username);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
@@ -146,6 +150,7 @@ public class DatabaseInteraction {
                 }
             }
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
         return true;
@@ -163,7 +168,8 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void insertTask(String username, String content, String priority, String dedline, String done) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TASK)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
+                INSERT_TASK.getName()))) {
             preparedStatement.setString(1, username);
             preparedStatement.setString(2, content);
             preparedStatement.setString(3, priority);
@@ -171,6 +177,7 @@ public class DatabaseInteraction {
             preparedStatement.setString(5, done);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -186,7 +193,8 @@ public class DatabaseInteraction {
      */
     public ObservableList<Task> getTasks(String username) {
         ObservableList<Task> tasks = FXCollections.observableArrayList();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(TASKS_INFO_SELECT_BY_USERNAME)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
+                TASKS_INFO_SELECT_BY_USERNAME.getName()))) {
             preparedStatement.setString(1, username);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -199,6 +207,7 @@ public class DatabaseInteraction {
                 }
             }
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
         return tasks;
@@ -216,7 +225,8 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void renameTask(String username, String newContent, Task selectedTask) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(RENAME_TASK)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
+                RENAME_TASK.getName()))) {
             preparedStatement.setString(1, newContent);
             preparedStatement.setString(2, username);
             preparedStatement.setString(3, selectedTask.getContent());
@@ -224,6 +234,7 @@ public class DatabaseInteraction {
             preparedStatement.setString(5, selectedTask.getDedline());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -236,7 +247,7 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void deleteAllTasks(String username) {
-        requestForAllTasks(username, DELETE_ALL_TASKS);
+        requestForAllTasks(username, getQuery(NameOfSQLRequests.DELETE_ALL_TASKS.getName()));
     }
 
     /**
@@ -247,7 +258,7 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void deleteAllExecuteTasks(String username) {
-        requestForAllTasks(username, DELETE_ALL_COMPLETED_TASKS);
+        requestForAllTasks(username, getQuery(NameOfSQLRequests.DELETE_ALL_COMPLETED_TASKS.getName()));
     }
 
     /**
@@ -258,7 +269,7 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void executeAllTasks(String username) {
-        requestForAllTasks(username, EXECUTE_ALL_TASKS);
+        requestForAllTasks(username, getQuery(NameOfSQLRequests.EXECUTE_ALL_TASKS.getName()));
     }
 
     /**
@@ -268,8 +279,8 @@ public class DatabaseInteraction {
      * @param selectedTask The {@code Task} representing the task to be removed.
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
-    public void removeTask(String username, Task selectedTask) {
-        delAndExecuteTask(username, selectedTask, DELETE_TASK);
+    public void deleteTask(String username, Task selectedTask) {
+        delAndExecuteTask(username, selectedTask, getQuery(NameOfSQLRequests.DELETE_TASK.getName()));
     }
 
     /**
@@ -280,7 +291,7 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void executeTask(String username, Task selectedTask) {
-        delAndExecuteTask(username, selectedTask, EXECUTE_TASK);
+        delAndExecuteTask(username, selectedTask, getQuery(NameOfSQLRequests.EXECUTE_TASK.getName()));
     }
 
     /**
@@ -291,7 +302,7 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL statement.
      */
     public void canselExecutionTask(String username, Task selectedTask) {
-        delAndExecuteTask(username, selectedTask, CANSEL_EXECUTION_TASK);
+        delAndExecuteTask(username, selectedTask, getQuery(NameOfSQLRequests.CANSEL_EXECUTION_TASK.getName()));
     }
 
     /**
@@ -307,6 +318,7 @@ public class DatabaseInteraction {
             preparedStatement.setString(1, username);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -328,9 +340,8 @@ public class DatabaseInteraction {
             preparedStatement.setString(4, selectedTask.getDedline());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
 }
-
-

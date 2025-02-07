@@ -11,6 +11,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.MainApplication;
 import ru.practise.pet_projects.todolistapp.database.DatabaseInteraction;
 import ru.practise.pet_projects.todolistapp.handlers.User;
@@ -25,6 +27,7 @@ import java.io.IOException;
  */
 public class StartMenuController {
     public static final DatabaseInteraction DATABASE = new DatabaseInteraction();
+    public static final Logger LOGGER = LogManager.getLogger(StartMenuController.class);
 
     @FXML
     private Button buttonCreateAccount, buttonEnter;
@@ -48,6 +51,7 @@ public class StartMenuController {
         try {
             createLogUpWindow();
         } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -63,7 +67,7 @@ public class StartMenuController {
     void Enter(ActionEvent ignoredEvent) throws IOException {
         String password = passwordField.getText();
         User user = DATABASE.getUsersInfo(emailField.getText());
-        if (user != null && password.equals(user.getPassword())) {
+        if (user != null && password.equals(user.password())) {
             createMainWindow(user);
         } else {
             emailField.getStyleClass().add("highlighted");
@@ -97,7 +101,7 @@ public class StartMenuController {
                 "todoList-mainPart.fxml"));
         Parent parent = fxmlLoader.load();
         MainBodyController mainBodyController = fxmlLoader.getController();
-        mainBodyController.initialize(user.getUsername());
+        mainBodyController.initialize(user.username());
         Stage stage = (Stage) buttonEnter.getScene().getWindow();
         stage.setScene(new Scene(parent, 945, 726));
         stage.show();

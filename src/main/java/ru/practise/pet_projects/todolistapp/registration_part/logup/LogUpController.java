@@ -11,6 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.MainApplication;
 
 import java.io.IOException;
@@ -23,6 +25,7 @@ import static ru.practise.pet_projects.todolistapp.registration_part.login.Start
  * between different screens in the application.
  */
 public class LogUpController {
+    public static final Logger LOGGER = LogManager.getLogger(LogUpController.class);
     public static final String REGEX_USERNAME = "^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё0-9_]*$";
     public static final String REGEX_EMAIL = "^[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$";
     public static final String REGEX_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).*[a-zA-Z].*$";
@@ -46,6 +49,7 @@ public class LogUpController {
         try {
             createWindow();
         } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }

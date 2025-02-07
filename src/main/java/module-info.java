@@ -28,8 +28,10 @@
 module ru.practise.pet_projects.todolistapp {
     requires javafx.controls;
     requires javafx.fxml;
-    requires java.sql;
     requires java.mail;
+    requires org.apache.logging.log4j;
+    requires java.sql;
+    requires static lombok;
 
 
     opens ru.practise.pet_projects.todolistapp to javafx.fxml;
