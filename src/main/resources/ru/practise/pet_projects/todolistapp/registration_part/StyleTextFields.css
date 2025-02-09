@@ -1,0 +1,8 @@
+.text-field {
+    -fx-border-color: transparent;
+    -fx-border-width: 2;
+}
+
+.text-field.highlighted {
+    -fx-border-color: red;
+}
