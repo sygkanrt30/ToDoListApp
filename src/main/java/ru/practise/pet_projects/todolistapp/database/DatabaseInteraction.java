@@ -1,17 +1,16 @@
 package ru.practise.pet_projects.todolistapp.database;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.handlers.Task;
-import ru.practise.pet_projects.todolistapp.handlers.User;
+import ru.practise.pet_projects.todolistapp.utils.Util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Properties;
 
 
@@ -24,6 +23,7 @@ public class DatabaseInteraction {
     public static final Logger LOGGER = LogManager.getLogger(DatabaseInteraction.class);
     private static Connection connection;
     private static final Properties QUERIES = new Properties();
+    public static final Util properties = new Util();
 
     /**
      * Constructs a new instance of the DatabaseInteraction class.
@@ -35,11 +35,29 @@ public class DatabaseInteraction {
      */
     public DatabaseInteraction() {
         try {
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/ToDoListApp", "postgres", "5432");
+            connection = DriverManager.getConnection(properties.getPropertiesValue("DATABASE_URL"),
+                    properties.getPropertiesValue("DATABASE_USER"),
+                    properties.getPropertiesValue("DATABASE_PASSWORD"));
         } catch (SQLException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
         LOGGER.info("Инициализация BD прошла успешно!!!");
+        getSQLReaquest();
+    }
+
+    /**
+     * <p>This method attempts to read a file named {@code queries.sql} from the classpath.
+     * If the file is not found, an {@code IOException} is thrown. The queries are loaded
+     * into a {@code Properties} object called {@code QUERIES} using UTF-8 encoding.</p>
+     *
+     * <p>In case of any {@code IOException} during the loading process, an error message
+     * is logged using {@code LOGGER}, and a {@code RuntimeException} is thrown to indicate
+     * the failure to load SQL queries.</p>
+     *
+     * @throws RuntimeException if the SQL queries cannot be loaded due to an {@code IOException}.
+     */
+    private void getSQLReaquest() {
         try (InputStream input = getClass().getResourceAsStream("queries.sql")) {
             if (input == null) {
                 throw new IOException("Файл не найден");
@@ -67,7 +85,7 @@ public class DatabaseInteraction {
      * @return A {@code User} object containing the user's information, or null if no user is found.
      * @throws RuntimeException If there is an error executing the SQL query.
      */
-    public User getUsersInfo(String login) {
+    public String[] getUserInfo(String login) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
                 USER_INFO_SELECT_BY_LOGIN.getName()))) {
             preparedStatement.setString(1, login);
@@ -76,14 +94,14 @@ public class DatabaseInteraction {
                     String loginResult = resultSet.getString("login");
                     String password = resultSet.getString("password");
                     String name = resultSet.getString("username");
-                    return new User(loginResult, password, name);
+                    return new String[]{loginResult, password, name};
                 }
             }
         } catch (SQLException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-        return null;
+        return new String[0];
     }
 
     /**
@@ -117,19 +135,8 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL query.
      */
     public boolean loginIsBusy(String login) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
-                USER_INFO_SELECT_BY_LOGIN.getName()))) {
-            preparedStatement.setString(1, login);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return false;
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-        return true;
+        return isBusy(NameOfSQLRequests.
+                USER_INFO_SELECT_BY_LOGIN, login);
     }
 
     /**
@@ -141,9 +148,14 @@ public class DatabaseInteraction {
      * @throws RuntimeException If there is an error executing the SQL query.
      */
     public boolean usernameIsBusy(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
-                USER_INFO_SELECT_BY_USERNAME.getName()))) {
-            preparedStatement.setString(1, username);
+        return isBusy(NameOfSQLRequests.
+                USER_INFO_SELECT_BY_USERNAME, username);
+    }
+
+    private boolean isBusy(NameOfSQLRequests userInfoSelectByIdentifier, String identifier) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(
+                userInfoSelectByIdentifier.getName()))) {
+            preparedStatement.setString(1, identifier);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return false;
@@ -183,16 +195,16 @@ public class DatabaseInteraction {
     }
 
     /**
-     * Retrieves a list of tasks associated with the specified username from the database.
+     * Retrieves a list of tasks parameters associated with the specified username from the database.
      * This method executes a SQL query to select all tasks belonging to the given user.
-     * It creates and returns a list of {@code Task} objects containing the details of each task.
+     * It creates and returns a list of {@code String[]} arrays containing the user's tasks parameters.
      *
      * @param username The username of the user whose tasks are to be retrieved.
-     * @return {@link ObservableList} of {@code Task} objects containing the user's tasks.
+     * @return {@link ArrayList} of {@code String[]} arrays containing the user's tasks parameters.
      * @throws RuntimeException If there is an error executing the SQL query.
      */
-    public ObservableList<Task> getTasks(String username) {
-        ObservableList<Task> tasks = FXCollections.observableArrayList();
+    public ArrayList<String[]> getTasks(String username) {
+        var arrOfTasksParameters = new ArrayList<String[]>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(getQuery(NameOfSQLRequests.
                 TASKS_INFO_SELECT_BY_USERNAME.getName()))) {
             preparedStatement.setString(1, username);
@@ -202,15 +214,15 @@ public class DatabaseInteraction {
                     String priority = resultSet.getString("priority");
                     String dedline = resultSet.getString("dedlines");
                     String status = resultSet.getString("status");
-                    Task task = new Task(content, priority, dedline, status);
-                    tasks.add(task);
+                    String[] taskParameters = {content, priority, dedline, status};
+                    arrOfTasksParameters.add(taskParameters);
                 }
             }
         } catch (SQLException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-        return tasks;
+        return arrOfTasksParameters;
     }
 
     /**

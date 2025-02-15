@@ -8,11 +8,13 @@ import org.apache.logging.log4j.Logger;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Random;
+
+import static ru.practise.pet_projects.todolistapp.database.DatabaseInteraction.properties;
 
 
 /**
@@ -23,9 +25,9 @@ import java.util.Random;
 @Getter
 public class EmailChecker {
     public static final Logger LOGGER = LogManager.getLogger(EmailChecker.class);
-    private static final String FROM = "todolistapplication252@gmail.com";
-    private static final String HOST = "smtp.gmail.com";
-    private static final String PORT = "465";
+    private static final String FROM = properties.getPropertiesValue("EMAIL_FROM");
+    private static final String HOST = properties.getPropertiesValue("EMAIL_HOST");
+    private static final String PORT = properties.getPropertiesValue("EMAIL_PORT");
     private final String code;
 
     /**
@@ -43,14 +45,12 @@ public class EmailChecker {
      */
     public void sendCodeToCheck(String email) {
         Properties properties = settingProperties();
-        Session session = Session.getInstance(
-                properties,
-                new Authenticator() {
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(FROM, "idvpbbqibkfawmxl");
-                    }
-                });
+        Session session = Session.getInstance(properties, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(FROM, properties.getProperty("EMAIL_PASSWORD"));
+            }
+        });
         session.setDebug(true);
         try {
             creatingAndSendingEmail(email, session);
@@ -85,14 +85,14 @@ public class EmailChecker {
         message.setFrom(new InternetAddress(FROM));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
         message.setSubject("Подтвердите email на ToDoList");
-        String htmlContent = makeHTMLString(code);
+        String htmlContent = convertHTMLToString(code);
         message.setContent(htmlContent, "text/html; charset=utf-8");
         Transport.send(message);
     }
 
     /**
      * This method reads the content from an HTML file located at
-     * "emailCode/Content.html". It searches for the placeholder
+     * "Content.html". It searches for the placeholder
      * "{{code}}" within the file content and replaces it with the specified code.
      *
      * @param code the code to be inserted into the HTML template. This code will replace the
@@ -100,17 +100,18 @@ public class EmailChecker {
      * @return a String representing the HTML content with the placeholder replaced by the provided code.
      * @throws RuntimeException if there is an error reading the file or if the file does not exist.
      */
-    private String makeHTMLString(String code) {
-        String fileContent;
-        try (FileInputStream fileInputStream = new FileInputStream("Content.html")) {
+    private String convertHTMLToString(String code) {
+        try (InputStream fileInputStream = getClass().getResourceAsStream("Content.html")) {
+            if (fileInputStream == null) {
+                throw new IOException("Файл не найден");
+            }
             byte[] buffer = fileInputStream.readAllBytes();
-            fileContent = new String(buffer, StandardCharsets.UTF_8);
+            String fileContent = new String(buffer, StandardCharsets.UTF_8);
+            return fileContent.replace("{{code}}", code);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-        fileContent = fileContent.replace("{{code}}", code);
-        return fileContent;
     }
 
     /**

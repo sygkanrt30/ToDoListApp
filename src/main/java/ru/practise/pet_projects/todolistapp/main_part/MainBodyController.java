@@ -15,6 +15,7 @@ import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.MainApplication;
+import ru.practise.pet_projects.todolistapp.database.DataProcessingFromAndForDatabase;
 import ru.practise.pet_projects.todolistapp.handlers.Task;
 
 import java.io.IOException;
@@ -76,21 +77,19 @@ public class MainBodyController {
      */
     @FXML
     void CreateTask(ActionEvent ignoredEvent) {
-        selectedTask = null;
         String contentTask = task.getText().trim();
         if (!contentTask.isEmpty()) {
             stringPriority = (stringPriority == null) ? "Приоритет 4" : stringPriority;
-            String stringDedline = (dedline.getValue() == null) ? "Дедлайн не назначен" : dedline.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String stringDedline = (dedline.getValue() == null) ?
+                    "Дедлайн не назначен" : dedline.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             if (isSameTask(contentTask, stringDedline, notCorrectFieldFill)) return;
-            table.getItems().clear();
             DATABASE.insertTask(username, contentTask, stringPriority, stringDedline, NOT_COMPLETED);
             complectionTable();
             resetParameters();
         } else {
             notCorrectFieldFill.setText("Поле содержания задачи не должно быть пустым!!!");
         }
-        notCorrectRenameFieldFill.setText("");
-        taskNotSelected.setText("");
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
@@ -118,7 +117,9 @@ public class MainBodyController {
      */
     private boolean isSameTask(String contentTask, String stringDedline, Label notCorrectFieldFill) {
         for (Task item : table.getItems()) {
-            if (item.getContent().equals(contentTask) && item.getPriority().equals(stringPriority) && item.getDedline().equals(stringDedline)) {
+            if (item.getContent().equals(contentTask) &&
+                    item.getPriority().equals(stringPriority) &&
+                    item.getDedline().equals(stringDedline)) {
                 notCorrectFieldFill.setText("Точно такая же задача уже есть в списке!!!");
                 return true;
             }
@@ -132,7 +133,8 @@ public class MainBodyController {
      * for the columns to display the content, priority, deadline, and status of each task.
      */
     private void complectionTable() {
-        ObservableList<Task> tasks = DATABASE.getTasks(username);
+        table.getItems().clear();
+        ObservableList<Task> tasks = DataProcessingFromAndForDatabase.makeListOfTableElements(username);
         tasksColumn.setCellValueFactory(new PropertyValueFactory<>("content"));
         prioritiesColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
         dedlinesColumn.setCellValueFactory(new PropertyValueFactory<>("dedline"));
@@ -141,44 +143,47 @@ public class MainBodyController {
     }
 
     /**
-     * This method sets the text of the {@code notCorrectRenameFieldFill} and
-     * {@code notCorrectFieldFill} labels to an empty string, effectively clearing any
-     * previous error messages.
+     * This method call the {@code clearErrorLabel} method
      *
      * @param ignoredEvent The key event that triggered this method (not used).
      */
     @FXML
     void clearLabel(KeyEvent ignoredEvent) {
-        notCorrectRenameFieldFill.setText("");
+        clearErrorLabelAndSelectedTask();
+    }
+
+    /**
+     * This method call the {@code clearErrorLabel} method
+     *
+     * @param ignoredEvent The key event that triggered this method (not used).
+     */
+    @FXML
+    void clearLabelUnderRename(KeyEvent ignoredEvent) {
         notCorrectFieldFill.setText("");
+        notCorrectRenameFieldFill.setText("");
+        taskNotSelected.setText("");
+    }
+
+    /**
+     * This method call the {@code clearErrorLabel} method
+     *
+     * @param ignoredEvent The action event that triggered this method (not used).
+     */
+    @FXML
+    void exchangeDate(ActionEvent ignoredEvent) {
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
      * This method sets the text of the {@code notCorrectRenameFieldFill} and
      * {@code notCorrectFieldFill} labels to an empty string, effectively clearing any
      * previous error messages.
-     *
-     * @param ignoredEvent The key event that triggered this method (not used).
      */
-    @FXML
-    void clearLabelUnderRename(KeyEvent ignoredEvent) {
-        notCorrectRenameFieldFill.setText("");
+    private void clearErrorLabelAndSelectedTask() {
         notCorrectFieldFill.setText("");
-    }
-
-    /**
-     * This method checks if the text in the {@code notCorrectFieldFill} label indicates that
-     * a duplicate task exists. If so, it clears the text. It also clears the
-     * {@code notCorrectRenameFieldFill} label.
-     *
-     * @param ignoredEvent The action event that triggered this method (not used).
-     */
-    @FXML
-    void exchangeDate(ActionEvent ignoredEvent) {
-        if (notCorrectFieldFill.getText().equals("Точно такая же задача уже есть в списке!!!")) {
-            notCorrectFieldFill.setText("");
-        }
         notCorrectRenameFieldFill.setText("");
+        selectedTask = null;
+        taskNotSelected.setText("");
     }
 
     /**
@@ -192,7 +197,7 @@ public class MainBodyController {
     void removeAllCompletedTasks(ActionEvent ignoredEvent) {
         DATABASE.deleteAllExecuteTasks(username);
         table.getItems().removeIf(item -> item.getStatus().equals("выполнено"));
-        clearLabelsAndSelectedTask();
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
@@ -204,10 +209,9 @@ public class MainBodyController {
      */
     @FXML
     void executeAllTasks(ActionEvent ignoredEvent) {
-        table.getItems().clear();
         DATABASE.executeAllTasks(username);
         complectionTable();
-        clearLabelsAndSelectedTask();
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
@@ -221,19 +225,7 @@ public class MainBodyController {
     void removeAllTasks(ActionEvent ignoredEvent) {
         DATABASE.deleteAllTasks(username);
         table.getItems().clear();
-        clearLabelsAndSelectedTask();
-    }
-
-    /**
-     * This method sets the {@code selectedTask} to {@code null} and clears the text
-     * in the labels {@code notCorrectRenameFieldFill}, {@code notCorrectFieldFill},
-     * and {@code taskNotSelected}.
-     */
-    private void clearLabelsAndSelectedTask() {
-        selectedTask = null;
-        notCorrectRenameFieldFill.setText("");
-        notCorrectFieldFill.setText("");
-        taskNotSelected.setText("");
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
@@ -292,31 +284,14 @@ public class MainBodyController {
 
     /**
      * This method checks if a task is selected. If no task is selected, it sets the button text
-     * to "Задача выполнена" (Task completed). If a task is selected and its status is {@code COMPLETED},
-     * it sets the button text to "Задача не выполнена" (Task not completed). Otherwise, it sets the text
+     * to "Задача не выполнена" (Task completed). If a task is selected and its status is {@code COMPLETED},
+     * it sets the button text to "Задача выполнена" (Task not completed). Otherwise, it sets the text
      * to "Задача выполнена" (Task completed). It also clears any error messages related to task selection.
      */
     private void writeTextOnButtonExecute() {
         if (selectedTask == null) {
             buttonExecute.setText("Задача выполнена");
         } else if (selectedTask.getStatus().equals(COMPLETED)) {
-            buttonExecute.setText("Задача не выполнена");
-        } else {
-            buttonExecute.setText("Задача выполнена");
-        }
-        taskNotSelected.setText("");
-    }
-
-    /**
-     * This method checks if a task is selected. If no task is selected, it sets the button text
-     * to "Задача выполнена" (Task completed). If a task is selected and its status is {@code NOT_COMPLETED},
-     * it sets the button text to "Задача не выполнена" (Task not completed). Otherwise, it sets the text
-     * to "Задача выполнена" (Task completed). It also clears any error messages related to task selection.
-     */
-    private void writeTextOnButtonExecuteViceVersa() {
-        if (selectedTask == null) {
-            buttonExecute.setText("Задача выполнена");
-        } else if (selectedTask.getStatus().equals(NOT_COMPLETED)) {
             buttonExecute.setText("Задача не выполнена");
         } else {
             buttonExecute.setText("Задача выполнена");
@@ -335,23 +310,19 @@ public class MainBodyController {
      */
     @FXML
     void executeTask(ActionEvent ignoredEvent) {
-        notCorrectRenameFieldFill.setText("");
-        notCorrectFieldFill.setText("");
         if (selectedTask == null) {
             taskNotSelected.setText("Задача для действия не выбрана!!!");
             return;
         }
-        writeTextOnButtonExecuteViceVersa();
+        writeTextOnButtonExecute();
         if (selectedTask.getStatus().equals(NOT_COMPLETED)) {
-            table.getItems().clear();
             DATABASE.executeTask(username, selectedTask);
             complectionTable();
         } else {
-            table.getItems().clear();
             DATABASE.canselExecutionTask(username, selectedTask);
             complectionTable();
         }
-        selectedTask = null;
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
@@ -371,15 +342,15 @@ public class MainBodyController {
         table.getItems().removeIf(item -> item.getContent().equals(selectedTask.getContent()) &&
                 item.getPriority().equals(selectedTask.getPriority()) &&
                 item.getDedline().equals(selectedTask.getDedline()));
-        clearLabelsAndSelectedTask();
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
      * This method checks if a task is selected. If not, it displays an error message.
-     * If a task is selected, it retrieves the new content from the input field. If the new
-     * content is not empty, it checks if the new task is the same as an existing task.
+     * If a task is selected, it retrieves the content from the input field. If the new
+     * content is not empty, it checks if the task is the same as an existing task.
      * If it is not the same, it renames the task in the database and updates the table.
-     * If the new content is empty, it displays an error message. Finally, it clears any labels
+     * If the content is empty, it displays an error message. Finally, it clears any labels
      * and resets the selected task.
      *
      * @param ignoredEvent The action event that triggered this method (not used).
@@ -390,22 +361,18 @@ public class MainBodyController {
             taskNotSelected.setText("Задача для действия не выбрана!!!");
             return;
         }
-        String newContentTask = renameTask.getText().trim();
-        if (!newContentTask.isEmpty()) {
-            table.getItems().clear();
+        String contentTask = renameTask.getText().trim();
+        if (!contentTask.isEmpty()) {
             stringPriority = selectedTask.getPriority();
             String stringDedline = selectedTask.getDedline();
-            if (isSameTask(newContentTask, stringDedline, notCorrectRenameFieldFill)) return;
-            table.getItems().clear();
-            DATABASE.renameTask(username, newContentTask, selectedTask);
+            if (isSameTask(contentTask, stringDedline, notCorrectRenameFieldFill)) return;
+            DATABASE.renameTask(username, contentTask, selectedTask);
             complectionTable();
-            renameTask.setText("");
-            dedline.setValue(null);
+            resetParameters();
         } else {
             notCorrectRenameFieldFill.setText("Поле содержания задачи не должно быть пустым!!!");
         }
-        notCorrectFieldFill.setText("");
-        selectedTask = null;
+        clearErrorLabelAndSelectedTask();
     }
 
     /**
@@ -468,10 +435,7 @@ public class MainBodyController {
      */
     private void setPrioritiesAndClearLabels() {
         priority.setText(stringPriority);
-        if (notCorrectFieldFill.getText().equals("Точно такая же задача уже есть в списке!!!")) {
-            notCorrectFieldFill.setText("");
-        }
-        notCorrectRenameFieldFill.setText("");
+        clearErrorLabelAndSelectedTask();
     }
 
     /**

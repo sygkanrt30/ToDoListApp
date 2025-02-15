@@ -56,19 +56,39 @@ public class LogUpController {
 
     /**
      * Validates user input for {@code email}, {@code username}, and {@code password}. If valid, proceeds to the email code checker window.
-     * Displays error messages if any input is incorrect or if the email or username is already taken.
      *
      * @param ignoredEvent The ActionEvent triggered by the continue button press.
      * @throws IOException If an input or output exception occurs while loading the next scene.
      */
     @FXML
     void Continue(ActionEvent ignoredEvent) throws IOException {
+        boolean goToNextWindow = false;
         String stringEmail = email.getText();
         String stringUsername = username.getText();
         String stringPassword = password.getText();
-        if (usernameIsCorrect(stringUsername) && emailIsCorrect(stringEmail) && passwordIsCorrect(stringPassword)) {
+        goToNextWindow = isGoToNextWindow(stringUsername, stringEmail, stringPassword, goToNextWindow);
+        if (goToNextWindow) {
+            createEmailCodeCheckerWindow(stringEmail, stringPassword, stringUsername);
+        }
+    }
+
+    /**
+     * Determines whether to proceed to the next window based on the validity
+     * of the provided username, email, and password. This method validates
+     * the inputs and checks against the database for existing users.
+     * Displays error messages if any input is incorrect or if the email or username is already taken.
+     *
+     * @param stringUsername the username entered by the user
+     * @param stringEmail    the email address entered by the user
+     * @param stringPassword the password entered by the user
+     * @param goToNextWindow a boolean indicating whether to proceed to the next window
+     * @return {@code true} if valid credentials are provided and the user can
+     * proceed to the next window; {@code false} otherwise
+     */
+    private boolean isGoToNextWindow(String stringUsername, String stringEmail, String stringPassword, boolean goToNextWindow) {
+        if (isUsernameCorrect(stringUsername) && isEmailCorrect(stringEmail) && isPasswordCorrect(stringPassword)) {
             if (DATABASE.loginIsBusy(stringEmail) && DATABASE.usernameIsBusy(stringUsername)) {
-                createEmailCodeCheckerWindow(stringEmail, stringPassword, stringUsername);
+                goToNextWindow = true;
             } else if (!DATABASE.loginIsBusy(stringEmail)) {
                 email.getStyleClass().add("highlighted");
                 notCorrectPasswordOrEmail1.setText("\uD83D\uDEABЭтот адрес электронной почты уже зарегистрирован в приложение!");
@@ -77,11 +97,11 @@ public class LogUpController {
                 notCorrectUsername.setText("\uD83D\uDEABЭто имя пользователя занято!");
             } else {
                 email.getStyleClass().add("highlighted");
-                notCorrectPasswordOrEmail1.setText("\uD83D\uDEABЭтот адрес электронной почты уже зарегистрирован в приложение!");
                 username.getStyleClass().add("highlighted");
+                notCorrectPasswordOrEmail1.setText("\uD83D\uDEABЭтот адрес электронной почты уже зарегистрирован в приложение!");
                 notCorrectUsername.setText("\uD83D\uDEABЭто имя пользователя занято!");
             }
-        } else if (!usernameIsCorrect(stringUsername)) {
+        } else if (!isUsernameCorrect(stringUsername)) {
             username.getStyleClass().add("highlighted");
             notCorrectUsername.setText("\uD83D\uDEABНекорректное имя пользователя!");
         } else {
@@ -90,6 +110,7 @@ public class LogUpController {
             notCorrectPasswordOrEmail1.setText("\uD83D\uDEABНекорректный адрес электронной почты или пароль!");
             notCorrectPasswordOrEmail2.setText("\uD83D\uDEABНекорректный адрес электронной почты или пароль!");
         }
+        return goToNextWindow;
     }
 
     /**
@@ -134,7 +155,7 @@ public class LogUpController {
      * @param username The username to validate.
      * @return true if the username is valid, false otherwise.
      */
-    private boolean usernameIsCorrect(String username) {
+    private boolean isUsernameCorrect(String username) {
         if (username.length() > 2 && username.length() < 16) {
             return username.matches(REGEX_USERNAME);
         }
@@ -148,7 +169,7 @@ public class LogUpController {
      * @param email The email address to validate.
      * @return true if the email is valid, false otherwise.
      */
-    private boolean emailIsCorrect(String email) {
+    private boolean isEmailCorrect(String email) {
         return email.matches(REGEX_EMAIL);
     }
 
@@ -160,7 +181,7 @@ public class LogUpController {
      * @param password The password to validate.
      * @return true if the password is valid, false otherwise.
      */
-    private boolean passwordIsCorrect(String password) {
+    private boolean isPasswordCorrect(String password) {
         if (password.length() > 7 && password.length() < 17) {
             return password.matches(REGEX_PASSWORD);
         }

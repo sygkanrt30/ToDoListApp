@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.MainApplication;
+import ru.practise.pet_projects.todolistapp.database.DataProcessingFromAndForDatabase;
 import ru.practise.pet_projects.todolistapp.database.DatabaseInteraction;
 import ru.practise.pet_projects.todolistapp.handlers.User;
 import ru.practise.pet_projects.todolistapp.main_part.MainBodyController;
@@ -58,7 +59,6 @@ public class StartMenuController {
 
     /**
      * Validates the entered email and password, and logs the user in if the credentials are correct.
-     * If the credentials are incorrect, it displays an error message.
      *
      * @param ignoredEvent The ActionEvent triggered by the button press.
      * @throws IOException If an input or output exception occurs while loading the next scene.
@@ -66,15 +66,25 @@ public class StartMenuController {
     @FXML
     void Enter(ActionEvent ignoredEvent) throws IOException {
         String password = passwordField.getText();
-        User user = DATABASE.getUsersInfo(emailField.getText());
+        User user = DataProcessingFromAndForDatabase.convertArrayOfDataForUser(emailField.getText());
         if (user != null && password.equals(user.password())) {
             createMainWindow(user);
         } else {
-            emailField.getStyleClass().add("highlighted");
-            passwordField.getStyleClass().add("highlighted");
-            notCorrectPasswordOrEmail1.setText("\uD83D\uDEABНеверный адрес электронной почты или пароль!");
-            notCorrectPasswordOrEmail2.setText("\uD83D\uDEABНеверный адрес электронной почты или пароль!");
+            highlightingWrongInputToEnter();
         }
+    }
+
+    /**
+     * Highlights the input fields for email and password when the user
+     * enters incorrect credentials. It adds a highlight style to the
+     * {@code emailField} and {@code passwordField}, and sets error
+     * messages to indicate an invalid email address or password.
+     */
+    private void highlightingWrongInputToEnter() {
+        emailField.getStyleClass().add("highlighted");
+        passwordField.getStyleClass().add("highlighted");
+        notCorrectPasswordOrEmail1.setText("\uD83D\uDEABНеверный адрес электронной почты или пароль!");
+        notCorrectPasswordOrEmail2.setText("\uD83D\uDEABНеверный адрес электронной почты или пароль!");
     }
 
     /**

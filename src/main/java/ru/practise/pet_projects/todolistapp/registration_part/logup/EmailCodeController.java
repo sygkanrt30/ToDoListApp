@@ -14,7 +14,6 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.practise.pet_projects.todolistapp.MainApplication;
-import ru.practise.pet_projects.todolistapp.database.DatabaseInteraction;
 import ru.practise.pet_projects.todolistapp.emailCode.EmailChecker;
 import ru.practise.pet_projects.todolistapp.main_part.MainBodyController;
 

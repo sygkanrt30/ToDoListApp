@@ -47,4 +47,6 @@ module ru.practise.pet_projects.todolistapp {
     exports ru.practise.pet_projects.todolistapp.emailCode;
     exports ru.practise.pet_projects.todolistapp.main_part;
     opens ru.practise.pet_projects.todolistapp.main_part to javafx.fxml;
+    exports ru.practise.pet_projects.todolistapp.utils;
+    opens ru.practise.pet_projects.todolistapp.utils to javafx.fxml;
 }
