@@ -121,9 +121,9 @@ public class MainBodyController {
      */
     private boolean isSameTask(String contentTask, String stringDedline, Label notCorrectFieldFill) {
         for (Task item : table.getItems()) {
-            if (item.getContent().get().equals(contentTask) &&
-                    item.getPriority().get().equals(stringPriority) &&
-                    item.getDedline().get().equals(stringDedline)) {
+            if (item.getContent().equals(contentTask) &&
+                    item.getPriority().equals(stringPriority) &&
+                    item.getDedline().equals(stringDedline)) {
                 notCorrectFieldFill.setText("Точно такая же задача уже есть в списке!!!");
                 return true;
             }
@@ -200,7 +200,7 @@ public class MainBodyController {
     @FXML
     void removeAllCompletedTasks(ActionEvent ignoredEvent) {
         DATABASE.deleteAllExecuteTasks(username);
-        table.getItems().removeIf(item -> item.getStatus().get().equals("выполнено"));
+        table.getItems().removeIf(item -> item.getStatus().equals("выполнено"));
         clearErrorLabelAndSelectedTask();
     }
 
@@ -295,7 +295,7 @@ public class MainBodyController {
     private void writeTextOnButtonExecute() {
         if (selectedTask == null) {
             buttonExecute.setText("Задача выполнена");
-        } else if (selectedTask.getStatus().get().equals(COMPLETED)) {
+        } else if (selectedTask.getStatus().equals(COMPLETED)) {
             buttonExecute.setText("Задача не выполнена");
         } else {
             buttonExecute.setText("Задача выполнена");
@@ -319,7 +319,7 @@ public class MainBodyController {
             return;
         }
         writeTextOnButtonExecute();
-        if (selectedTask.getStatus().get().equals(NOT_COMPLETED)) {
+        if (selectedTask.getStatus().equals(NOT_COMPLETED)) {
             DATABASE.executeTask(username, selectedTask);
             complectionTable();
         } else {
@@ -367,8 +367,8 @@ public class MainBodyController {
         }
         String contentTask = renameTask.getText().trim();
         if (!contentTask.isEmpty()) {
-            stringPriority = String.valueOf(selectedTask.getPriority());
-            String stringDedline = String.valueOf(selectedTask.getDedline());
+            stringPriority = selectedTask.getPriority();
+            String stringDedline = selectedTask.getDedline();
             if (isSameTask(contentTask, stringDedline, notCorrectRenameFieldFill)) return;
             DATABASE.renameTask(username, contentTask, selectedTask);
             complectionTable();

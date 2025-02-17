@@ -18,7 +18,7 @@ import java.sql.SQLException;
 @Log4j2
 public class DatabaseInteraction {
     private static Connection connection;
-    private static final PropertyReader PROPERTIES = new PropertyReader("queries.sql");
+    private static final PropertyReader PROPERTIES = new PropertyReader("ToDoListApp.properties");
 
     /**
      * Constructs a new instance of the DatabaseInteraction class.
@@ -107,9 +107,9 @@ public class DatabaseInteraction {
         try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.getRenameTaskQuery())) {
             preparedStatement.setString(1, newContent);
             preparedStatement.setString(2, username);
-            preparedStatement.setString(3, String.valueOf(selectedTask.getContent()));
-            preparedStatement.setString(4, String.valueOf(selectedTask.getPriority()));
-            preparedStatement.setString(5, String.valueOf(selectedTask.getDedline()));
+            preparedStatement.setString(3, selectedTask.getContent());
+            preparedStatement.setString(4, selectedTask.getPriority());
+            preparedStatement.setString(5, selectedTask.getDedline());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -213,9 +213,9 @@ public class DatabaseInteraction {
     private void delAndExecuteTask(String username, Task selectedTask, String request) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(request)) {
             preparedStatement.setString(1, username);
-            preparedStatement.setString(2, String.valueOf(selectedTask.getContent()));
-            preparedStatement.setString(3, String.valueOf(selectedTask.getPriority()));
-            preparedStatement.setString(4, String.valueOf(selectedTask.getDedline()));
+            preparedStatement.setString(2, selectedTask.getContent());
+            preparedStatement.setString(3, selectedTask.getPriority());
+            preparedStatement.setString(4, selectedTask.getDedline());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             log.error(e.getMessage(), e);

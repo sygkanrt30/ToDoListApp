@@ -2,7 +2,6 @@ package ru.practise.pet_projects.todolistapp.handlers;
 
 import javafx.beans.property.SimpleStringProperty;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
@@ -15,7 +14,6 @@ import lombok.ToString;
  */
 @ToString
 @EqualsAndHashCode
-@Getter
 @RequiredArgsConstructor
 public class Task {
     private final SimpleStringProperty content;
@@ -36,5 +34,21 @@ public class Task {
         this.priority = new SimpleStringProperty(priority);
         this.dedline = new SimpleStringProperty(dedline);
         this.status = new SimpleStringProperty(status);
+    }
+
+    public String getContent() {
+        return content.get();
+    }
+
+    public String getPriority() {
+        return priority.get();
+    }
+
+    public String getDedline() {
+        return dedline.get();
+    }
+
+    public String getStatus() {
+        return status.get();
     }
 }
