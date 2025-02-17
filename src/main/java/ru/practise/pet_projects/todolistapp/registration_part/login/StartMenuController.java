@@ -11,11 +11,11 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 import ru.practise.pet_projects.todolistapp.MainApplication;
-import ru.practise.pet_projects.todolistapp.database.DataProcessingFromAndForDatabase;
 import ru.practise.pet_projects.todolistapp.database.DatabaseInteraction;
+import ru.practise.pet_projects.todolistapp.database.SqlQueries;
+import ru.practise.pet_projects.todolistapp.database.UserInteraction;
 import ru.practise.pet_projects.todolistapp.handlers.User;
 import ru.practise.pet_projects.todolistapp.main_part.MainBodyController;
 
@@ -26,9 +26,10 @@ import java.io.IOException;
  * It handles user interactions for account creation and user login, validates user credentials,
  * and navigates between different screens of the application.
  */
+@Log4j2
 public class StartMenuController {
     public static final DatabaseInteraction DATABASE = new DatabaseInteraction();
-    public static final Logger LOGGER = LogManager.getLogger(StartMenuController.class);
+    private static final UserInteraction USER_INTERACTION = new UserInteraction();
 
     @FXML
     private Button buttonCreateAccount, buttonEnter;
@@ -52,7 +53,7 @@ public class StartMenuController {
         try {
             createLogUpWindow();
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -66,7 +67,7 @@ public class StartMenuController {
     @FXML
     void Enter(ActionEvent ignoredEvent) throws IOException {
         String password = passwordField.getText();
-        User user = DataProcessingFromAndForDatabase.convertArrayOfDataForUser(emailField.getText());
+        User user = USER_INTERACTION.getUserInfo(SqlQueries.getUserByLoginQuery(), emailField.getText());
         if (user != null && password.equals(user.password())) {
             createMainWindow(user);
         } else {

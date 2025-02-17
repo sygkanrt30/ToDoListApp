@@ -1,40 +1,37 @@
-package ru.practise.pet_projects.todolistapp.emailCode;
+package ru.practise.pet_projects.todolistapp.email;
 
 
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
-import javax.mail.*;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 import java.util.Random;
-
-import static ru.practise.pet_projects.todolistapp.database.DatabaseInteraction.properties;
 
 
 /**
  * The {@code EmailChecker} class is responsible for sending email verification codes
  * to users for email confirmation in the ToDoList application.
  */
-
+@Log4j2
 @Getter
 public class EmailChecker {
-    public static final Logger LOGGER = LogManager.getLogger(EmailChecker.class);
-    private static final String FROM = properties.getPropertiesValue("EMAIL_FROM");
-    private static final String HOST = properties.getPropertiesValue("EMAIL_HOST");
-    private static final String PORT = properties.getPropertiesValue("EMAIL_PORT");
     private final String code;
+    private final EmailService emailService;
 
     /**
      * Constructs an {@code EmailChecker} instance with random codes of verification email
      */
     public EmailChecker() {
         code = makeRandomCode();
+        emailService = new EmailService();
     }
 
     /**
@@ -44,49 +41,34 @@ public class EmailChecker {
      * @param email The recipient's email address to which the verification code will be sent.
      */
     public void sendCodeToCheck(String email) {
-        Properties properties = settingProperties();
-        Session session = Session.getInstance(properties, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(FROM, properties.getProperty("EMAIL_PASSWORD"));
-            }
-        });
-        session.setDebug(true);
+        Session session = emailService.settingSession();
         try {
-            creatingAndSendingEmail(email, session);
+            sendEmail(email, session);
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
-    /**
-     * Configures the properties for the email session.
-     *
-     * @return A {@code Properties} object containing the SMTP settings.
-     */
-    private Properties settingProperties() {
-        Properties properties = new Properties();
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.ssl.enable", "true");
-        properties.put("mail.smtp.host", HOST);
-        properties.put("mail.smtp.port", PORT);
-        return properties;
-    }
 
     /**
-     * Creates and sends an email containing the verification code.
+     * Creates an email containing the verification code.
      *
      * @param email   The recipient's email address.
      * @param session The email session used to send the message.
-     * @throws MessagingException If there is an error in creating or sending the email.
+     * @throws MessagingException If there is an error in creating email.
      */
-    private void creatingAndSendingEmail(String email, Session session) throws MessagingException {
+    private MimeMessage createEmail(String email, Session session) throws MessagingException {
         MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(FROM));
+        message.setFrom(new InternetAddress(emailService.getEmailFrom()));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
         message.setSubject("Подтвердите email на ToDoList");
         String htmlContent = convertHTMLToString(code);
         message.setContent(htmlContent, "text/html; charset=utf-8");
+        return message;
+    }
+
+    private void sendEmail(String email, Session session) throws MessagingException {
+        MimeMessage message = createEmail(email, session);
         Transport.send(message);
     }
 
@@ -103,13 +85,13 @@ public class EmailChecker {
     private String convertHTMLToString(String code) {
         try (InputStream fileInputStream = getClass().getResourceAsStream("Content.html")) {
             if (fileInputStream == null) {
-                throw new IOException("Файл не найден");
+                throw new IOException("Файл не найден: Content.html");
             }
             byte[] buffer = fileInputStream.readAllBytes();
             String fileContent = new String(buffer, StandardCharsets.UTF_8);
             return fileContent.replace("{{code}}", code);
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -121,6 +103,6 @@ public class EmailChecker {
      */
     private String makeRandomCode() {
         Random r = new Random();
-        return String.valueOf(r.nextInt(100000, 1000000) + 1);
+        return String.valueOf(r.nextInt(100000, 1000000));
     }
 }

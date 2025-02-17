@@ -11,24 +11,23 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 import ru.practise.pet_projects.todolistapp.MainApplication;
+import ru.practise.pet_projects.todolistapp.database.UserInteraction;
 
 import java.io.IOException;
-
-import static ru.practise.pet_projects.todolistapp.registration_part.login.StartMenuController.DATABASE;
 
 /**
  * The {@code LogUpController} class handles the user interface and logic for user registration.
  * It validates user input for username, email, and password, and manages navigation
  * between different screens in the application.
  */
+@Log4j2
 public class LogUpController {
-    public static final Logger LOGGER = LogManager.getLogger(LogUpController.class);
     public static final String REGEX_USERNAME = "^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё0-9_]*$";
     public static final String REGEX_EMAIL = "^[a-zA-Z0-9]+(\\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$";
     public static final String REGEX_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).*[a-zA-Z].*$";
+    private static final UserInteraction USER_INTERACTION = new UserInteraction();
 
     @FXML
     private Button buttonBack, buttonContinue;
@@ -49,7 +48,7 @@ public class LogUpController {
         try {
             createWindow();
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -87,12 +86,12 @@ public class LogUpController {
      */
     private boolean isGoToNextWindow(String stringUsername, String stringEmail, String stringPassword, boolean goToNextWindow) {
         if (isUsernameCorrect(stringUsername) && isEmailCorrect(stringEmail) && isPasswordCorrect(stringPassword)) {
-            if (DATABASE.loginIsBusy(stringEmail) && DATABASE.usernameIsBusy(stringUsername)) {
+            if (USER_INTERACTION.loginIsBusy(stringEmail) && USER_INTERACTION.usernameIsBusy(stringUsername)) {
                 goToNextWindow = true;
-            } else if (!DATABASE.loginIsBusy(stringEmail)) {
+            } else if (!USER_INTERACTION.loginIsBusy(stringEmail)) {
                 email.getStyleClass().add("highlighted");
                 notCorrectPasswordOrEmail1.setText("\uD83D\uDEABЭтот адрес электронной почты уже зарегистрирован в приложение!");
-            } else if (!DATABASE.usernameIsBusy(stringUsername)) {
+            } else if (!USER_INTERACTION.usernameIsBusy(stringUsername)) {
                 username.getStyleClass().add("highlighted");
                 notCorrectUsername.setText("\uD83D\uDEABЭто имя пользователя занято!");
             } else {

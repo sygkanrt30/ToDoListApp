@@ -18,7 +18,7 @@
  *   <li><code>ru.practise.pet_projects.todolistapp.database</code> - contains database-related classes and methods.</li>
  *   <li><code>ru.practise.pet_projects.todolistapp.handlers</code> - contains event handlers for the application.</li>
  *   <li><code>ru.practise.pet_projects.todolistapp.registration_part.login</code> - manages user login functionality.</li>
- *   <li><code>ru.practise.pet_projects.todolistapp.emailCode</code> - handles email code verification.</li>
+ *   <li><code>ru.practise.pet_projects.todolistapp.email</code> - handles email code verification.</li>
  *   <li><code>ru.practise.pet_projects.todolistapp.main_part</code> - contains the main parts of the application.</li>
  * </ul>
  *
@@ -44,7 +44,7 @@ module ru.practise.pet_projects.todolistapp {
     opens ru.practise.pet_projects.todolistapp.handlers to javafx.fxml;
     exports ru.practise.pet_projects.todolistapp.registration_part.login;
     opens ru.practise.pet_projects.todolistapp.registration_part.login to javafx.fxml;
-    exports ru.practise.pet_projects.todolistapp.emailCode;
+    exports ru.practise.pet_projects.todolistapp.email;
     exports ru.practise.pet_projects.todolistapp.main_part;
     opens ru.practise.pet_projects.todolistapp.main_part to javafx.fxml;
     exports ru.practise.pet_projects.todolistapp.utils;

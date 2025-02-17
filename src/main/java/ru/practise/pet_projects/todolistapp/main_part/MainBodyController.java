@@ -12,10 +12,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 import ru.practise.pet_projects.todolistapp.MainApplication;
-import ru.practise.pet_projects.todolistapp.database.DataProcessingFromAndForDatabase;
+import ru.practise.pet_projects.todolistapp.database.TaskInteraction;
 import ru.practise.pet_projects.todolistapp.handlers.Task;
 
 import java.io.IOException;
@@ -32,13 +31,16 @@ import static ru.practise.pet_projects.todolistapp.registration_part.login.Start
  * <p>This class utilizes JavaFX components for building the GUI and interacts with
  * a database to persist task information.</p>
  */
+@Log4j2
 public class MainBodyController {
+    private static final TaskInteraction TASK_INTERACTION = new TaskInteraction();
     private String stringPriority;
     private String username;
     private static final String COMPLETED = "выполнено";
     private static final String NOT_COMPLETED = "не выполнено";
+    public static final String DEFAULT_PRIORITY = "Приоритет 4";
     private Task selectedTask;
-    public static final Logger LOGGER = LogManager.getLogger(MainBodyController.class);
+
     @FXML
     private Button buttonCreateTask, buttonExecuteAllTasks, buttonRemoveAllTCompletedTasks, buttonRemoveAllTasks, buttonExit,
             buttonExecute, buttonRemove, buttonRename;
@@ -79,10 +81,12 @@ public class MainBodyController {
     void CreateTask(ActionEvent ignoredEvent) {
         String contentTask = task.getText().trim();
         if (!contentTask.isEmpty()) {
-            stringPriority = (stringPriority == null) ? "Приоритет 4" : stringPriority;
+            stringPriority = (stringPriority == null) ? DEFAULT_PRIORITY : stringPriority;
             String stringDedline = (dedline.getValue() == null) ?
                     "Дедлайн не назначен" : dedline.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            if (isSameTask(contentTask, stringDedline, notCorrectFieldFill)) return;
+            if (isSameTask(contentTask, stringDedline, notCorrectFieldFill)){
+                return;
+            }
             DATABASE.insertTask(username, contentTask, stringPriority, stringDedline, NOT_COMPLETED);
             complectionTable();
             resetParameters();
@@ -100,7 +104,7 @@ public class MainBodyController {
     private void resetParameters() {
         task.setText("");
         priority.setText("");
-        stringPriority = "Приоритет 4";
+        stringPriority = DEFAULT_PRIORITY;
         dedline.setValue(null);
     }
 
@@ -117,9 +121,9 @@ public class MainBodyController {
      */
     private boolean isSameTask(String contentTask, String stringDedline, Label notCorrectFieldFill) {
         for (Task item : table.getItems()) {
-            if (item.getContent().equals(contentTask) &&
-                    item.getPriority().equals(stringPriority) &&
-                    item.getDedline().equals(stringDedline)) {
+            if (item.getContent().get().equals(contentTask) &&
+                    item.getPriority().get().equals(stringPriority) &&
+                    item.getDedline().get().equals(stringDedline)) {
                 notCorrectFieldFill.setText("Точно такая же задача уже есть в списке!!!");
                 return true;
             }
@@ -134,7 +138,7 @@ public class MainBodyController {
      */
     private void complectionTable() {
         table.getItems().clear();
-        ObservableList<Task> tasks = DataProcessingFromAndForDatabase.makeListOfTableElements(username);
+        ObservableList<Task> tasks = TASK_INTERACTION.getTasks(username);
         tasksColumn.setCellValueFactory(new PropertyValueFactory<>("content"));
         prioritiesColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
         dedlinesColumn.setCellValueFactory(new PropertyValueFactory<>("dedline"));
@@ -196,7 +200,7 @@ public class MainBodyController {
     @FXML
     void removeAllCompletedTasks(ActionEvent ignoredEvent) {
         DATABASE.deleteAllExecuteTasks(username);
-        table.getItems().removeIf(item -> item.getStatus().equals("выполнено"));
+        table.getItems().removeIf(item -> item.getStatus().get().equals("выполнено"));
         clearErrorLabelAndSelectedTask();
     }
 
@@ -239,7 +243,7 @@ public class MainBodyController {
         try {
             createWindow();
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -291,7 +295,7 @@ public class MainBodyController {
     private void writeTextOnButtonExecute() {
         if (selectedTask == null) {
             buttonExecute.setText("Задача выполнена");
-        } else if (selectedTask.getStatus().equals(COMPLETED)) {
+        } else if (selectedTask.getStatus().get().equals(COMPLETED)) {
             buttonExecute.setText("Задача не выполнена");
         } else {
             buttonExecute.setText("Задача выполнена");
@@ -315,7 +319,7 @@ public class MainBodyController {
             return;
         }
         writeTextOnButtonExecute();
-        if (selectedTask.getStatus().equals(NOT_COMPLETED)) {
+        if (selectedTask.getStatus().get().equals(NOT_COMPLETED)) {
             DATABASE.executeTask(username, selectedTask);
             complectionTable();
         } else {
@@ -363,8 +367,8 @@ public class MainBodyController {
         }
         String contentTask = renameTask.getText().trim();
         if (!contentTask.isEmpty()) {
-            stringPriority = selectedTask.getPriority();
-            String stringDedline = selectedTask.getDedline();
+            stringPriority = String.valueOf(selectedTask.getPriority());
+            String stringDedline = String.valueOf(selectedTask.getDedline());
             if (isSameTask(contentTask, stringDedline, notCorrectRenameFieldFill)) return;
             DATABASE.renameTask(username, contentTask, selectedTask);
             complectionTable();
@@ -423,7 +427,7 @@ public class MainBodyController {
      */
     @FXML
     void setPriority4(ActionEvent ignoredEvent) {
-        stringPriority = "Приоритет 4";
+        stringPriority = DEFAULT_PRIORITY;
         setPrioritiesAndClearLabels();
     }
 
