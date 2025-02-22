@@ -4,8 +4,11 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Properties;
+
 @Log4j2
 public class PropertyReader {
     private final String propertiesFileName;
@@ -22,8 +25,9 @@ public class PropertyReader {
 
     private Properties getProperties() {
         Properties properties = new Properties();
-        try (InputStream inputStream = getClass().getResourceAsStream(propertiesFileName)) {
-            properties.load(inputStream);
+        try (InputStream inputStream = getClass().getResourceAsStream(propertiesFileName);
+             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            properties.load(reader);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -31,7 +35,7 @@ public class PropertyReader {
         return properties;
     }
 
-    public String get(String propertyName){
+    public String get(String propertyName) {
         return mapOfProperties.get(propertyName);
     }
 }

@@ -200,7 +200,7 @@ public class MainBodyController {
     @FXML
     void removeAllCompletedTasks(ActionEvent ignoredEvent) {
         DATABASE.deleteAllExecuteTasks(username);
-        table.getItems().removeIf(item -> item.getStatus().equals("выполнено"));
+        table.getItems().removeIf(item -> item.getStatus().equals(COMPLETED));
         clearErrorLabelAndSelectedTask();
     }
 

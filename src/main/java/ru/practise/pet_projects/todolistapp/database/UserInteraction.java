@@ -55,7 +55,7 @@ public class UserInteraction {
      * @throws RuntimeException If there is an error executing the SQL query.
      */
     public boolean loginIsBusy(String login) {
-        return !(getUserInfo(SqlQueries.getUserByLoginQuery(), login) == null);
+        return (getUserInfo(SqlQueries.getUserByLoginQuery(), login) == null);
     }
 
     /**
@@ -67,7 +67,7 @@ public class UserInteraction {
      * @throws RuntimeException If there is an error executing the SQL query.
      */
     public boolean usernameIsBusy(String username) {
-        return !(getUserInfo(SqlQueries.getUserByUsernameQuery(), username) == null);
+        return (getUserInfo(SqlQueries.getUserByUsernameQuery(), username) == null);
     }
 
 }
