@@ -21,12 +21,6 @@ import java.io.IOException;
 import static ru.practise.pet_projects.todolistapp.registration_part.login.StartMenuController.DATABASE;
 
 
-/**
- * The {@code EmailCodeController} class manages the user interface and logic for the email
- * confirmation code entry during the registration process in the ToDoList application.
- * It handles user interactions, validates the confirmation code, and navigates between
- * different screens of the application.
- */
 @Log4j2
 public class EmailCodeController {
     private int k = 4;
@@ -44,11 +38,6 @@ public class EmailCodeController {
     @FXML
     private Label notCorrectCode, countTries;
 
-    /**
-     * Navigates back to the registration screen when the back button is pressed.
-     *
-     * @param ignoredEvent The ActionEvent triggered by the button press.
-     */
     @FXML
     void BackToLogUpScreen(ActionEvent ignoredEvent) {
         try {
@@ -59,13 +48,6 @@ public class EmailCodeController {
         }
     }
 
-    /**
-     * Validates the entered confirmation code and proceeds to the main application
-     * if the code is correct. Otherwise, it displays an error message.
-     *
-     * @param ignoredEvent The ActionEvent triggered by the button press.
-     * @throws IOException If an input or output exception occurs while loading the next scene.
-     */
     @FXML
     void Continue(ActionEvent ignoredEvent) throws IOException {
         if (emailChecker.getCode().equals(codeField.getText().trim())) {
@@ -77,11 +59,6 @@ public class EmailCodeController {
         }
     }
 
-    /**
-     * Creates and displays the registration window.
-     *
-     * @throws IOException If an input or output exception occurs while loading the FXML file.
-     */
     private void createLogUpWindow() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
                 "logup/todoList-logUpScreen.fxml"));
@@ -90,11 +67,6 @@ public class EmailCodeController {
         stage.show();
     }
 
-    /**
-     * Creates and displays the main application window after successful registration.
-     *
-     * @throws IOException If an input or output exception occurs while loading the FXML file.
-     */
     private void createMainWindow() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/" +
                 "todoList-mainPart.fxml"));
@@ -106,11 +78,6 @@ public class EmailCodeController {
         stage.show();
     }
 
-    /**
-     * Sends the confirmation code to the user's email and decrements the remaining attempts.
-     *
-     * @param ignoredEvent The ActionEvent triggered by the button press.
-     */
     @FXML
     void sendCode(ActionEvent ignoredEvent) {
         if (k > 0) {
@@ -122,13 +89,6 @@ public class EmailCodeController {
         }
     }
 
-    /**
-     * Initializes the controller with user credentials and sends a verification code to the provided {@code email}.
-     *
-     * @param email    the user's email address
-     * @param password the user's password
-     * @param username the user's username
-     */
     @FXML
     public void initialize(String email, String password, String username) {
         this.email = email;
@@ -137,11 +97,6 @@ public class EmailCodeController {
         emailChecker.sendCodeToCheck(email);
     }
 
-    /**
-     * Clears the error label and resets the styling of the code input field when a key event occurs.
-     *
-     * @param ignoredEvent tThe ActionEvent triggered by the button press.
-     */
     @FXML
     void clearLabel(KeyEvent ignoredEvent) {
         notCorrectCode.setText("");

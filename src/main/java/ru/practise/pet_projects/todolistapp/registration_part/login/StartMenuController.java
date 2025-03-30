@@ -21,11 +21,7 @@ import ru.practise.pet_projects.todolistapp.main_part.MainBodyController;
 
 import java.io.IOException;
 
-/**
- * The {@code StartMenuController} class manages the user interface and logic for the start menu of the application.
- * It handles user interactions for account creation and user login, validates user credentials,
- * and navigates between different screens of the application.
- */
+
 @Log4j2
 public class StartMenuController {
     public static final DatabaseInteraction DATABASE = new DatabaseInteraction();
@@ -43,11 +39,6 @@ public class StartMenuController {
     @FXML
     private PasswordField passwordField;
 
-    /**
-     * Navigates to the account creation screen when the create account button is pressed.
-     *
-     * @param ignoredEvent The ActionEvent triggered by the button press.
-     */
     @FXML
     void CreateAccount(ActionEvent ignoredEvent) {
         try {
@@ -58,12 +49,6 @@ public class StartMenuController {
         }
     }
 
-    /**
-     * Validates the entered email and password, and logs the user in if the credentials are correct.
-     *
-     * @param ignoredEvent The ActionEvent triggered by the button press.
-     * @throws IOException If an input or output exception occurs while loading the next scene.
-     */
     @FXML
     void Enter(ActionEvent ignoredEvent) throws IOException {
         String password = passwordField.getText();
@@ -75,12 +60,6 @@ public class StartMenuController {
         }
     }
 
-    /**
-     * Highlights the input fields for email and password when the user
-     * enters incorrect credentials. It adds a highlight style to the
-     * {@code emailField} and {@code passwordField}, and sets error
-     * messages to indicate an invalid email address or password.
-     */
     private void highlightingWrongInputToEnter() {
         emailField.getStyleClass().add("highlighted");
         passwordField.getStyleClass().add("highlighted");
@@ -88,11 +67,6 @@ public class StartMenuController {
         notCorrectPasswordOrEmail2.setText("\uD83D\uDEABНеверный адрес электронной почты или пароль!");
     }
 
-    /**
-     * Creates and displays the account creation window.
-     *
-     * @throws IOException If an input or output exception occurs while loading the FXML file.
-     */
     private void createLogUpWindow() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("registration_part/" +
                 "logup/todoList-logUpScreen.fxml"));
@@ -101,12 +75,6 @@ public class StartMenuController {
         stage.show();
     }
 
-    /**
-     * Creates and displays the main application window after a successful login.
-     *
-     * @param user The User object representing the logged-in user.
-     * @throws IOException If an input or output exception occurs while loading the FXML file.
-     */
     private void createMainWindow(User user) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main_part/" +
                 "todoList-mainPart.fxml"));
@@ -118,11 +86,6 @@ public class StartMenuController {
         stage.show();
     }
 
-    /**
-     * Clears error messages and highlighted styles when a key is pressed in the input fields.
-     *
-     * @param ignoredEvent The KeyEvent triggered by a key press.
-     */
     @FXML
     void clearLabel(KeyEvent ignoredEvent) {
         notCorrectPasswordOrEmail1.setText("");

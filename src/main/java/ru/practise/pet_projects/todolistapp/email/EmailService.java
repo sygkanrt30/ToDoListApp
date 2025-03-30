@@ -18,11 +18,6 @@ public class EmailService {
         this.settingOfEmail = settingProperties();
     }
 
-    /**
-     * Configures the properties for the email session.
-     *
-     * @return A {@code Properties} object containing the SMTP settings.
-     */
     private Properties settingProperties() {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", PROPERTIES.get("mail.smtp.auth"));
@@ -32,14 +27,6 @@ public class EmailService {
         return properties;
     }
 
-    /**
-     * <p>This method initializes a {@link Session} object using the settings defined in
-     * `settingOfEmail` and provides authentication through the specified email address and password.</p>
-     *
-     * @return a configured {@link Session} object that can be used for sending emails.
-     * @throws NullPointerException     if any required property in `settingOfEmail` or `emailFrom` is null.
-     * @throws IllegalArgumentException if the email address is invalid or if no password is provided.
-     */
     public Session settingSession() {
         Session session = Session.getInstance(settingOfEmail, new Authenticator() {
             @Override
